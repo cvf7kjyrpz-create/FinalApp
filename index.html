@@ -874,32 +874,29 @@ if ("serviceWorker" in navigator) {
 
       document.getElementById("btnCloseNote").onclick = () => noteDialog.close();
 
-      document.getElementById("search").oninput = () => render();
-      document.getElementById("filterFlag").onchange = () => render();
-
       document.getElementById("inputImport").onchange = async (e) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-        try {
-          const data = await importJson(file);
-          if (Array.isArray(data)) {
-            items = data;
-          } else if (data && typeof data === "object") {
-            if (Array.isArray(data.items)) items = data.items;
-            if (Array.isArray(data.invoices)) invoices = data.invoices;
-          }
-          saveItems();
-          saveInvoices();
-          render();
-          renderInvoices();
-          alert("Backup importiert.");
-        } catch (err) {
-          console.error(err);
-          alert("Fehler beim Import.");
-        } finally {
-          e.target.value = "";
-        }
-      };
+  const file = e.target.files?.[0];
+  if (!file) return;
+  try {
+    const data = await importJson(file);
+    if (Array.isArray(data)) {
+      items = data;
+    } else if (data && typeof data === "object") {
+      if (Array.isArray(data.items)) items = data.items;
+      if (Array.isArray(data.invoices)) invoices = data.invoices;
+    }
+    saveItems();
+    saveInvoices();
+    render();
+    renderInvoices();
+    alert("Backup importiert.");
+  } catch (err) {
+    console.error(err);
+    alert("Fehler beim Import.");
+  } finally {
+    e.target.value = "";
+  }
+};
 
       /* Fotoauswahl */
       document.getElementById("itemPhoto").addEventListener("change", (e) => {
