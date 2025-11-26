@@ -984,36 +984,33 @@
 
       /* Tabellenaktionen Rechnungen */
       invoiceBody.addEventListener("click", (e) => {
-        const btn = e.target.closest("button");
-        if (!btn) return;
+  const btn = e.target.closest("button");
+  if (!btn) return;
+  const id = btn.dataset.id;
+  const action = btn.dataset.action;
+  if (!id || !action) return;
+  const inv = invoices.find(r => r.id === id);
+  if (!inv) return;
 
-        const id = btn.dataset.id;
-        const action = btn.dataset.action;
-        if (!id || !action) return;
-
-        const inv = invoices.find(r => r.id === id);
-        if (!inv) return;
-
-        switch (action) {
-          case "photos":
-            showInvoicePhotos(inv);
-            break;
-          case "view":
-            openInvoicePreview(inv, false);
-            break;
-          case "cancel":
-            handleCancelInvoice(inv);
-            break;
-          case "delete":
-            if (confirm("Diese Rechnung wirklich löschen?")) {
-              invoices = invoices.filter(r => r.id !== id);
-              saveInvoices();
-              renderInvoices();
-            }
-            break;
-        }
-      });
-
+  switch (action) {
+    case "photos":
+      showInvoicePhotos(inv);
+      break;
+    case "view":
+      openInvoicePreview(inv, false);
+      break;
+    case "cancel":
+      handleCancelInvoice(inv);
+      break;
+    case "delete":
+      if (confirm("Diese Rechnung wirklich löschen?")) {
+        invoices = invoices.filter(r => r.id !== id);
+        saveInvoices();
+        renderInvoices();
+      }
+      break;
+  }
+});
       /* Firmendaten-Button */
       document.getElementById("btnFirmSettings").onclick = () => openFirmDialog();
       document.getElementById("btnCancelFirm").onclick = () => firmDialog.close();
