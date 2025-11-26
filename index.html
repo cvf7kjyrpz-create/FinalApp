@@ -1208,38 +1208,34 @@
           const total = qty * price;
 
           tr.innerHTML = `
-            <td>${item.flagged ? "⭐" : ""}</td>
-            <td>${escapeHtml(item.articleNumber || "")}</td>
-            <td>${escapeHtml(item.name || "")}</td>
-            <td>${escapeHtml(item.condition || "")}</td>
-            <td>${escapeHtml(item.size || "")}</td>
-            <td>${escapeHtml(item.store || "")}</td>
-            <td>
-              <input type="number" min="0" value="${qty}" class="qty-input" data-id="${item.id}">
-              ${qty <= 1 ? '<span class="badge-low">niedrig</span>' : ""}
-            </td>
-            <td>${price.toFixed(2).replace(".", ",")}</td>
-            <td>${total.toFixed(2).replace(".", ",")}</td>
-            <td>${escapeHtml(item.purchaseDate || "")}</td>
-            <td>
-              ${item.photoDataUrl
-                ? `<button class="icon-btn" data-action="photo" data-id="${item.id}" title="Foto anzeigen">📷</button>`
-                : '<span class="text-muted">–</span>'}
-            </td>
-            <td>
-              ${item.note
-                ? `<button class="icon-btn" data-action="note" data-id="${item.id}" title="Notiz anzeigen">📝</button>`
-                : '<span class="text-muted">–</span>'}
-            </td>
-            <td>
-              <div class="actions-cell">
-                <button class="icon-btn" data-action="flag" data-id="${item.id}" title="Markieren">⭐</button>
-                <button class="icon-btn" data-action="edit" data-id="${item.id}" title="Bearbeiten">✏️</button>
-                <button class="icon-btn" data-action="invoice" data-id="${item.id}" title="Rechnung erstellen">💶</button>
-                <button class="icon-btn danger" data-action="delete" data-id="${item.id}" title="Löschen">🗑️</button>
-              </div>
-            </td>
-          `;
+  <td>${item.flagged ? "⭐" : ""}</td>
+  <td>${escapeHtml(item.articleNumber || "")}</td>
+  <td>${escapeHtml(item.name || "")}</td>
+  <td>${escapeHtml(item.condition || "")}</td>
+  <td>${escapeHtml(item.size || "")}</td>
+  <td>${escapeHtml(item.store || "")}</td>
+  <td>
+    <input type="number" min="0" value="${qty}" class="qty-input" data-id="${item.id}">
+    ${qty <= 1 ? '<span class="badge-low">niedrig</span>' : ""}
+  </td>
+  <td>${price.toFixed(2).replace(".", ",")}</td>
+  <td>${total.toFixed(2).replace(".", ",")}</td>
+  <td>${escapeHtml(item.purchaseDate || "")}</td>
+  <td>
+    ${item.photoDataUrl ? `<button class="icon-btn" data-action="photo" data-id="${item.id}" title="Foto ansehen">📷</button>` : '<span class="text-muted">–</span>'}
+  </td>
+  <td>
+    ${item.note ? `<button class="icon-btn" data-action="note" data-id="${item.id}" title="Notiz anzeigen">📝</button>` : '<span class="text-muted">–</span>'}
+  </td>
+  <td>
+    <div class="actions-cell">
+      <button class="icon-btn" data-action="flag" data-id="${item.id}" title="Markieren">⭐</button>
+      <button class="icon-btn" data-action="edit" data-id="${item.id}" title="Bearbeiten">✏️</button>
+      <button class="icon-btn" data-action="invoice" data-id="${item.id}" title="Rechnung erstellen">💶</button>
+      <button class="icon-btn danger" data-action="delete" data-id="${item.id}" title="Löschen">🗑️</button>
+    </div>
+  </td>
+`;
           tbody.appendChild(tr);
         }
 
