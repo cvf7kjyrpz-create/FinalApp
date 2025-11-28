@@ -1,1912 +1,316 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <title>Lager Pro V4 – Inventur & Rechnungen</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#050509" />
-
-  <style>
-    :root{
-      --bg:#050509;
-      --bg-elevated:#11131b;
-      --bg-elevated-soft:#151823;
-      --border:#2b3040;
-      --accent:#2ecc71;
-      --accent-soft:rgba(46,204,113,0.18);
-      --danger:#ff5c5c;
-      --danger-soft:rgba(255,92,92,0.16);
-      --text:#f5f5f7;
-      --text-soft:#c5c8d8;
-      --muted:#8d92a8;
-      --radius:10px;
-      --shadow-soft:0 14px 35px rgba(0,0,0,0.55);
-    }
-
-    *{box-sizing:border-box;}
-
-    body{
-      margin:0;
-      padding:0;
-      font-family:system-ui,-apple-system,"SF Pro Text","Segoe UI",sans-serif;
-      background:radial-gradient(circle at top,#202438 0,#050509 55%);
-      color:var(--text);
-      -webkit-font-smoothing:antialiased;
-    }
-
-    .app-shell{
-      max-width:1200px;
-      margin:0 auto;
-      padding:0.8rem 0.9rem 1.2rem;
-    }
-
-    header.app-header{
-      padding:0.75rem 1rem 0.6rem;
-      border-radius:14px;
-      background:linear-gradient(120deg,rgba(46,204,113,0.22),rgba(0,0,0,0.65));
-      box-shadow:var(--shadow-soft);
-      margin-bottom:0.7rem;
-    }
-
-    .header-top{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:0.8rem;
-    }
-
-    .app-title{
-      display:flex;
-      flex-direction:column;
-      gap:0.1rem;
-    }
-    .app-title h1{
-      margin:0;
-      font-size:1.05rem;
-      letter-spacing:0.04em;
-      text-transform:uppercase;
-    }
-    .app-title span{
-      font-size:0.7rem;
-      color:var(--text-soft);
-    }
-
-    .pill{
-      padding:0.15rem 0.6rem;
-      border-radius:999px;
-      border:1px solid rgba(245,245,247,0.25);
-      font-size:0.7rem;
-      color:var(--text-soft);
-      white-space:nowrap;
-    }
-
-    /* NAV */
-    .nav-bar{
-      margin-top:0.6rem;
-      display:flex;
-      gap:0.4rem;
-    }
-    .nav-btn{
-      padding:0.25rem 0.9rem;
-      border-radius:999px;
-      border:1px solid rgba(245,245,247,0.18);
-      background:rgba(0,0,0,0.25);
-      color:var(--text-soft);
-      font-size:0.78rem;
-      cursor:pointer;
-    }
-    .nav-btn.active{
-      background:#f5f5f7;
-      color:#050509;
-      font-weight:600;
-      border-color:#f5f5f7;
-    }
-
-    /* Statistik Lager */
-    #stats{
-      margin-top:0.7rem;
-      display:flex;
-      flex-wrap:wrap;
-      gap:0.45rem;
-      font-size:0.78rem;
-    }
-    .stat-chip{
-      background:var(--bg-elevated);
-      border-radius:999px;
-      border:1px solid var(--border);
-      padding:0.28rem 0.7rem;
-      display:flex;
-      align-items:center;
-      gap:0.35rem;
-      color:var(--muted);
-    }
-    .stat-chip b{
-      color:var(--text);
-      font-size:0.8rem;
-    }
-
-    /* Umsatz/Gewinn Rechnungen */
-    #invoiceStats{
-      margin-top:0.7rem;
-      display:flex;
-      flex-wrap:wrap;
-      gap:0.45rem;
-      font-size:0.78rem;
-    }
-
-    .invoice-chip{
-      background:var(--bg-elevated);
-      border-radius:999px;
-      border:1px solid var(--border);
-      padding:0.28rem 0.7rem;
-      display:flex;
-      align-items:center;
-      gap:0.35rem;
-      color:var(--muted);
-    }
-    .invoice-chip b{
-      color:var(--text);
-      font-size:0.8rem;
-    }
-
-    /* TOOLBAR */
-    .toolbar{
-      margin-top:0.9rem;
-      display:flex;
-      flex-wrap:wrap;
-      gap:0.45rem;
-      align-items:center;
-      justify-content:space-between;
-    }
-
-    .toolbar-left,
-    .toolbar-right{
-      display:flex;
-      flex-wrap:wrap;
-      gap:0.4rem;
-      align-items:center;
-    }
-
-    button{
-      cursor:pointer;
-      padding:0.32rem 0.85rem;
-      border-radius:999px;
-      border:1px solid var(--border);
-      background:var(--bg-elevated-soft);
-      color:var(--text);
-      font-size:0.8rem;
-      display:inline-flex;
-      align-items:center;
-      gap:0.3rem;
-      white-space:nowrap;
-      transition:background 0.15s ease,transform 0.1s ease,box-shadow 0.15s ease,border-color 0.15s ease;
-    }
-
-    button.primary{
-      background:var(--accent);
-      border-color:var(--accent);
-      color:#03130a;
-      font-weight:bold;
-      box-shadow:0 4px 18px rgba(46,204,113,0.35);
-    }
-
-    button.primary:active{
-      transform:scale(0.97);
-      box-shadow:none;
-    }
-
-    button.danger{
-      border-color:var(--danger);
-      color:var(--danger);
-      background:var(--danger-soft);
-    }
-
-    button:disabled{
-      opacity:0.4;
-      cursor:default;
-      box-shadow:none;
-      transform:none;
-    }
-
-    label.btn-like{
-      padding:0.32rem 0.85rem;
-      border-radius:999px;
-      border:1px dashed var(--border);
-      background:transparent;
-      font-size:0.8rem;
-      display:inline-flex;
-      align-items:center;
-      gap:0.3rem;
-      cursor:pointer;
-      color:var(--muted);
-    }
-    label.btn-like input{display:none;}
-
-    input,select{
-      padding:0.32rem 0.5rem;
-      border-radius:999px;
-      border:1px solid var(--border);
-      background:#070b13;
-      color:var(--text);
-      font-size:0.8rem;
-      outline:none;
-    }
-    input[type="search"]{
-      flex:1;
-      min-width:0;
-    }
-    input::placeholder{color:var(--muted);}
-
-    select{
-      padding-right:1.4rem;
-      background-image:linear-gradient(45deg,transparent 50%, var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);
-      background-position:calc(100% - 12px) calc(50% - 3px),calc(100% - 8px) calc(50% - 3px);
-      background-size:4px 4px,4px 4px;
-      background-repeat:no-repeat;
-    }
-
-    textarea{
-      padding:0.35rem 0.4rem;
-      border-radius:8px;
-      border:1px solid var(--border);
-      background:#070b13;
-      color:var(--text);
-      font-size:0.8rem;
-      resize:vertical;
-    }
-
-    /* TABLE CARD */
-    .table-card{
-      margin-top:0.8rem;
-      border-radius:14px;
-      border:1px solid var(--border);
-      background:radial-gradient(circle at top left,rgba(46,204,113,0.04),transparent 56%);
-      overflow:hidden;
-      box-shadow:0 18px 45px rgba(0,0,0,0.65);
-    }
-
-    .table-wrapper{
-      max-height:70vh;
-      overflow:auto;
-    }
-
-    table{
-      width:100%;
-      border-collapse:collapse;
-      min-width:950px;
-    }
-    th,td{
-      padding:0.14rem 0.25rem;
-      border-bottom:1px solid #1e2333;
-      font-size:0.5rem;
-      white-space:nowrap;
-    }
-    th{
-      background:#171b27;
-      text-align:left;
-      color:var(--muted);
-      position:sticky;
-      top:0;
-      z-index:1;
-    }
-    tbody tr:nth-child(odd){background:#0e1119;}
-    tbody tr:nth-child(even){background:#131722;}
-    tbody tr.flagged{
-      background:linear-gradient(90deg,rgba(46,204,113,0.11),rgba(14,17,25,1));
-    }
-    tbody tr.cancelled{
-      background:#262a33 !important;
-      color:#8b8f9e;
-    }
-
-    .storno-label{
-      font-size:0.45rem;
-      color:#ff8b8b;
-      margin-top:0.1rem;
-    }
-
-    .text-muted{color:var(--muted);}
-
-    .qty-input{
-      width:32px !important;
-      padding:0.05rem;
-      font-size:0.5rem;
-      text-align:center;
-      border-radius:6px;
-      border:1px solid var(--border);
-      background:#05070f;
-      color:var(--text);
-    }
-
-    .badge-low{
-      background:var(--accent-soft);
-      color:var(--accent);
-      padding:0.05rem 0.25rem;
-      border-radius:999px;
-      font-size:0.42rem;
-      margin-left:0.12rem;
-    }
-
-    .actions-cell{
-      display:flex;
-      gap:0.15rem;
-      flex-wrap:nowrap;
-    }
-
-    .icon-btn{
-      border-radius:999px;
-      padding:0.12rem 0.28rem;
-      font-size:0.6rem;
-      border:1px solid var(--border);
-      background:#10141f;
-      min-width:0;
-    }
-    .icon-btn.danger{
-      border-color:var(--danger);
-      background:var(--danger-soft);
-      color:var(--danger);
-    }
-
-    /* Mehrpositionen in Rechnung-Dialog */
-    .invoice-pos-row{
-      display:flex;
-      gap:0.3rem;
-      align-items:flex-end;
-      margin-top:0.25rem;
-    }
-    .invoice-pos-row select{
-      flex:2;
-    }
-    .invoice-pos-row input{
-      flex:1;
-    }
-
-    @media(max-width:800px){
-      .app-shell{padding:0.7rem;}
-      .header-top{flex-direction:column;align-items:flex-start;}
-      .toolbar{flex-direction:column;align-items:stretch;}
-      .toolbar-left,.toolbar-right{width:100%;justify-content:flex-start;}
-      table{min-width:0;}
-      th:nth-child(11),td:nth-child(11){
-        display:none;
-      }
-    }
-
-    /* Dialoge */
-    dialog{
-      background:#10121c;
-      border:1px solid var(--border);
-      color:var(--text);
-      border-radius:14px;
-      padding:1rem 0.95rem 0.9rem;
-      width:95%;
-      max-width:440px;
-      box-shadow:0 24px 70px rgba(0,0,0,0.85);
-    }
-    dialog::backdrop{
-      background:rgba(0,0,0,0.7);
-    }
-
-    .dialog-title{
-      margin:0 0 0.7rem;
-      font-size:0.95rem;
-    }
-
-    .form-grid{
-      display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
-      gap:0.6rem;
-    }
-    .form-grid label{
-      font-size:0.75rem;
-      display:flex;
-      flex-direction:column;
-      gap:0.18rem;
-      color:var(--text-soft);
-    }
-    .form-grid input,.form-grid select,.form-grid textarea{
-      border-radius:8px;
-    }
-    .full-width{grid-column:1/-1;}
-
-    .dialog-menu{
-      display:flex;
-      justify-content:flex-end;
-      gap:0.5rem;
-      margin-top:0.9rem;
-    }
-
-    .dialog-photo-content img{
-      max-width:90vw;
-      max-height:70vh;
-      border-radius:var(--radius);
-      border:1px solid var(--border);
-      display:block;
-    }
-
-    .small-hint{
-      font-size:0.7rem;
-      color:var(--muted);
-    }
-  </style>
-
-  <!-- PWA – Manifest + Service Worker -->
-  <link rel="manifest" href="manifest.webmanifest">
-  <script>
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("./service-worker.js")
-        .then(() => console.log("Service Worker aktiv"))
-        .catch(err => console.warn("Service Worker Fehler:", err));
-    }
-  </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>Lagerverwaltung</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+body{margin:0;font-family:system-ui;background:#000;color:#fff;overflow:hidden;}
+header{position:fixed;top:0;left:0;width:100%;background:#111;z-index:100;padding:12px 0;display:flex;flex-direction:column;align-items:center;gap:8px;}
+header h2{margin:0;font-size:20px;text-align:center;}
+.header-container{max-width:480px;width:100%;display:flex;flex-direction:column;align-items:center;gap:8px;padding:0 8px;}
+.counters{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;width:100%;}
+.counters div{background:linear-gradient(145deg,#222,#111);padding:6px 10px;border-radius:12px;text-align:center;flex:1 1 100px;max-width:45%;font-size:13px;box-shadow:0 2px 6px rgba(0,0,0,0.7);}
+.top-buttons{display:flex;justify-content:center;flex-wrap:wrap;gap:6px;width:100%;}
+.top-buttons button{background:#222;border:1px solid #337aff;border-radius:12px;padding:10px;color:white;font-size:13px;cursor:pointer;flex:1 1 40%;max-width:48%;box-sizing:border-box;box-shadow:0 2px 6px rgba(0,0,0,0.6);}
+#search{width:100%;max-width:480px;padding:10px;border-radius:10px;border:1px solid #444;background:#111;color:white;margin-bottom:0;box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);}
+.table-container{position:absolute;top:260px;bottom:0;width:100%;overflow:auto;}
+table{width:100%;border-collapse:collapse;color:white;min-width:900px;}
+th,td{border-bottom:1px solid #444;padding:3px 6px;text-align:center;white-space:nowrap;font-size:12px;}
+th{background:#111;position:sticky;top:0;z-index:10;}
+.icon-btn{background:none;border:none;color:white;font-size:14px;cursor:pointer;margin:0 4px;padding:0;}
+.icon-btn:hover{color:#337aff;}
+#popup-bg,#img-popup-bg,#del-popup-bg{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);justify-content:center;align-items:center;z-index:200;}
+.popup,#img-popup,#del-popup,#del-popup{width:320px;max-width:90%;background:#111;padding:20px;border-radius:16px;border:2px solid #337aff;box-shadow:0 6px 20px rgba(0,0,0,0.8);color:white;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;transition: transform 0.2s;}
+.popup input,.popup textarea{width:100%;max-width:100%;padding:10px;background:#222;border:1px solid #444;color:white;border-radius:10px;box-sizing:border-box;}
+.popup h2{margin-top:0;}
+.popup button,#img-popup button,#del-popup button{width:100%;max-width:140px;padding:8px;margin-top:6px;border-radius:10px;border:1px solid #337aff;background:#222;color:white;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.6);}
+.popup button:hover,#img-popup button:hover,#del-popup button:hover{background:#333;transform:translateY(-2px);}
+tr.marked{background: rgba(51,122,255,0.2);}
+#img-popup img{max-width:100%;max-height:400px;margin-bottom:10px;}
+</style>
 </head>
-
 <body>
-  <div class="app-shell">
-    <header class="app-header">
-      <div class="header-top">
-        <div class="app-title">
-          <h1>Lager Pro V4</h1>
-          <span>Inventur & Rechnungen – lokal auf deinem Gerät</span>
-        </div>
-        <div class="pill">Kleinunternehmer · kein MwSt-Ausweis</div>
-      </div>
 
-      <div class="nav-bar">
-        <button class="nav-btn active" id="navLager">Lager</button>
-        <button class="nav-btn" id="navRechnungen">Rechnungen</button>
-      </div>
-    </header>
-
-    <!-- =============== LAGER-ANSICHT =============== -->
-    <section id="view-lager">
-      <!-- Statistik Lager -->
-      <div id="stats">
-        <div class="stat-chip">
-          Typen: <b id="statCount">0</b>
-        </div>
-        <div class="stat-chip">
-          Gesamtmenge: <b id="statQty">0</b>
-        </div>
-        <div class="stat-chip">
-          Lagerwert aktuell: <b id="statTotal">0,00 €</b>
-        </div>
-        <div class="stat-chip">
-          Lagerwert gesamt: <b id="statTotalEver">0,00 €</b>
-        </div>
-      </div>
-
-      <!-- Toolbar Lager -->
-<div class="toolbar">
-  <div class="toolbar-left">
-
-    <button class="primary" id="btnAdd">＋ Artikel</button>
-
-    <label class="btn-like">
-      <span>Backup importieren (JSON)</span>
-      <input type="file" id="inputImport" accept="application/json">
-    </label>
-
-    <button id="btnExportJson">Backup exportieren</button>
-
+<header>
+  <div class="header-container">
+    <h2>Lagerverwaltung</h2>
+    <div class="counters">
+      <div>Artikel: <span id="countArtikel">0</span></div>
+      <div>Menge: <span id="gesamtMenge">0</span></div>
+      <div>Wert gelagert: <span id="wertGelagert">0 €</span></div>
+      <div>Gesamtwert: <span id="wertInsgesamt">0 €</span></div>
+    </div>
+    <div class="top-buttons">
+      <button onclick="openPopup()">Artikel anlegen</button>
+      <button onclick="exportBackup()">Backup Export</button>
+      <button onclick="importBackup()">Backup Import</button>
+      <button onclick="generatePDF()">Inventur PDF</button>
+    </div>
+    <input id="search" placeholder="Suchen..." oninput="searchTable()">
   </div>
+</header>
 
-  <div class="toolbar-right">
-    <input id="search" type="search"
-      placeholder="Suche nach Name, Nummer, Zustand, Größe, Shop, Notiz …">
-    <select id="filterFlag">
-      <option value="all">Alle</option>
-      <option value="flagged">Markierte</option>
-    </select>
-  </div>
+<div class="table-container">
+<table id="tbl">
+<thead>
+<tr>
+<th>Nr</th><th>Name</th><th>Menge</th><th>Preis/Stk</th><th>Wert</th><th>Wo gekauft</th><th>Datum</th><th>Bilder</th><th>Aktionen</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
 </div>
-      <!-- Tabelle Lager -->
-      <section class="table-card">
-        <div class="table-wrapper">
-          <table>
-            <thead>
-              <tr>
-                <th>★</th>
-                <th>Art.-Nr.</th>
-                <th>Name</th>
-                <th>Zustand</th>
-                <th>Größe</th>
-                <th>Wo gekauft</th>
-                <th>Menge</th>
-                <th>Preis/Stk (€)</th>
-                <th>Gesamt (€)</th>
-                <th>Kaufdatum</th>
-                <th>Foto</th>
-                <th>Notiz</th>
-                <th>Aktion</th>
-              </tr>
-            </thead>
-            <tbody id="tbody"></tbody>
-          </table>
-        </div>
-      </section>
-    </section>
 
-    <!-- =============== RECHNUNGS-ANSICHT =============== -->
-    <section id="view-rechnungen" style="display:none;">
-
-      <!-- Firmendaten-Button -->
-      <div class="toolbar" style="margin-top:0.5rem;justify-content:flex-end;">
-        <button id="btnFirmSettings">⚙️ Firmendaten</button>
-      </div>
-
-      <!-- Umsatz / Gewinn -->
-      <div id="invoiceStats">
-        <div class="invoice-chip">
-          Rechnung gesamt: <b id="invoiceTotalRevenue">0,00 €</b>
-        </div>
-        <div class="invoice-chip">
-          Gewinn / Verlust (intern): <b id="invoiceTotalProfit">0,00 €</b>
-        </div>
-      </div>
-
-      <!-- Toolbar Rechnungen -->
-      <div class="toolbar">
-        <div class="toolbar-left">
-          <span style="font-size:0.78rem;color:var(--muted);">Alle Rechnungen aus deinem Lagerverkauf</span>
-        </div>
-        <div class="toolbar-right">
-          <input id="invoiceSearch" type="search" placeholder="Suche nach Rechnungsnr., Name, Artikel, Plattform …">
-        </div>
-      </div>
-
-      <!-- Tabelle Rechnungen -->
-      <section class="table-card" style="margin-top:0.7rem;">
-        <div class="table-wrapper">
-          <table>
-            <thead>
-              <tr>
-                <th>Nr.</th>
-                <th>Datum</th>
-                <th>Kunde</th>
-                <th>Artikel</th>
-                <th>Menge</th>
-                <th>Rechnung (€)</th>
-                <th>Gewinn/Verlust (€)</th>
-                <th>Plattform</th>
-                <th>Zahlung</th>
-                <th>Aktion</th>
-              </tr>
-            </thead>
-            <tbody id="invoiceBody"></tbody>
-          </table>
-        </div>
-      </section>
-    </section>
-  </div>
-
-  <!-- Artikel-Dialog -->
-  <dialog id="itemDialog">
-    <h3 class="dialog-title">Artikel bearbeiten</h3>
-    <form id="itemForm" class="form-grid" onsubmit="return false;">
-      <label>
-        Artikelnummer
-        <input id="itemNumber">
-      </label>
-
-      <label>
-        Kaufdatum
-        <input id="itemDate" type="date">
-      </label>
-
-      <label class="full-width">
-        Artikelname
-        <input id="itemName" required>
-      </label>
-
-      <label>
-        Zustand
-        <select id="itemCondition">
-          <option value="">– bitte wählen –</option>
-          <option value="Neu">Neu</option>
-          <option value="Wie neu">Wie neu</option>
-          <option value="Gebraucht">Gebraucht</option>
-        </select>
-      </label>
-
-      <label>
-        Größe
-        <input id="itemSize">
-      </label>
-
-      <label>
-        Wo gekauft
-        <input id="itemStore">
-      </label>
-
-      <label>
-        Menge
-        <input id="itemQty" type="number" min="0" value="1">
-      </label>
-
-      <label>
-        Einkaufspreis pro Stück (€)
-        <input id="itemPrice" type="number" step="0.01" min="0" value="0">
-      </label>
-
-      <label class="full-width">
-        Notiz
-        <textarea id="itemNote" rows="3" placeholder="z.B. Besonderheiten, Lagerort …"></textarea>
-      </label>
-
-      <label class="full-width">
-        Foto
-        <input id="itemPhoto" type="file" accept="image/*">
-        <span id="itemPhotoInfo" class="small-hint">Kein Foto ausgewählt</span>
-      </label>
-
-      <label style="display:flex;align-items:center;gap:0.3rem;">
-        <input id="itemFlagged" type="checkbox">
-        <span class="small-hint">Artikel markieren</span>
-      </label>
-
-      <div class="dialog-menu full-width">
-        <button type="button" id="btnCancelItem">Abbrechen</button>
-        <button type="button" class="primary" id="btnSaveItem">Speichern</button>
-      </div>
-    </form>
-  </dialog>
-
-  <!-- Foto-Dialog -->
-  <dialog id="photoDialog">
-    <div class="dialog-photo-content">
-      <img id="photoDialogImg" alt="Artikel-Foto">
-      <div class="dialog-menu">
-        <button type="button" id="btnOpenPhoto" class="primary">Bild öffnen (Speichern möglich)</button>
-        <button type="button" id="btnClosePhoto" class="primary">Schließen</button>
-      </div>
-    </div>
-  </dialog>
-
-  <!-- Notiz-Dialog -->
-  <dialog id="noteDialog">
-    <h3 style="margin-top:0;font-size:0.9rem;">Notiz</h3>
-    <pre id="noteDialogText" style="white-space:pre-wrap;font-size:0.75rem;"></pre>
-    <div class="dialog-menu">
-      <button type="button" id="btnCloseNote" class="primary">Schließen</button>
-    </div>
-  </dialog>
-
-  <!-- Rechnungs-Dialog -->
-  <dialog id="invoiceDialog">
-    <h3 class="dialog-title">Rechnung aus Artikel erstellen</h3>
-    <form id="invoiceForm" class="form-grid" onsubmit="return false;">
-
-      <div class="full-width">
-        <span class="small-hint">Positionen (Menge + Einzelpreis, Artikel aus Lager)</span>
-        <div id="invoicePositions"></div>
-        <button type="button" class="icon-btn" id="btnAddPosition">＋ Position</button>
-      </div>
-
-      <label>
-        Verkaufsdatum
-        <input id="invSaleDate" type="date">
-      </label>
-
-      <label class="full-width">
-        Käufer (Name + Adresse + Ort in ein Feld)
-        <textarea id="invBuyerFull" rows="3" placeholder="Name&#10;Straße Nr.&#10;PLZ Ort"></textarea>
-      </label>
-
-      <label>
-        Plattform (z.B. Vinted, eBay)
-        <input id="invPlatform">
-      </label>
-
-      <label>
-        Zahlungsart
-        <input id="invPaymentMethod" placeholder="z.B. PayPal, Bar, Überweisung">
-      </label>
-
-      <div class="dialog-menu full-width">
-        <button type="button" id="btnCancelInvoice">Abbrechen</button>
-        <button type="button" class="primary" id="btnSaveInvoice">Rechnung erstellen</button>
-      </div>
-    </form>
-  </dialog>
-
-  <!-- Firmendaten-Dialog -->
-  <dialog id="firmDialog">
-    <h3 class="dialog-title">Firmendaten & Rechnungstext</h3>
-    <form id="firmForm" class="form-grid" onsubmit="return false;">
-      <label class="full-width">
-        Firmenname
-        <input id="firmName">
-      </label>
-
-      <label class="full-width">
-        Straße / Hausnummer
-        <input id="firmStreet">
-      </label>
-
-      <label>
-        PLZ / Ort
-        <input id="firmZipCity">
-      </label>
-
-      <label>
-        Land
-        <input id="firmCountry">
-      </label>
-
-      <label>
-        USt-ID
-        <input id="firmUstId">
-      </label>
-
-      <label class="full-width">
-        E-Mail
-        <input id="firmEmail">
-      </label>
-
-      <label class="full-width">
-        Geschäftsführer
-        <input id="firmCeo" placeholder="z.B. Max Mustermann">
-      </label>
-
-      <label class="full-width">
-        Rechnungstext (unter der Tabelle)
-        <textarea id="firmPaymentText" rows="4"></textarea>
-      </label>
-
-      <label class="full-width">
-        Fußzeile (ganz unten)
-        <textarea id="firmFooterText" rows="3"></textarea>
-      </label>
-
-      <div class="dialog-menu full-width">
-        <button type="button" id="btnCancelFirm">Abbrechen</button>
-        <button type="button" class="primary" id="btnSaveFirm">Speichern</button>
-      </div>
-    </form>
-  </dialog>
-
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const ITEM_STORAGE_KEY = "lager-pro-v4-items";
-      const INVOICE_STORAGE_KEY = "lager-pro-v4-invoices";
-      const INVOICE_COUNTER_KEY = "lager-pro-v4-invoice-counter";
-      const FIRM_DATA_KEY = "lager-pro-v4-firmendaten";
-
-      let items = [];
-      let invoices = [];
-      let currentItemId = null;
-      let tempPhotoDataUrl = null;
-      let currentInvoiceItemId = null;
-
-      let firmData = {
-        name:"OneByOneFashion",
-        street:"Professor-Däubel-Straße 6",
-        zipCity:"98693 Ilmenau",
-        country:"Deutschland",
-        ustId:"",
-        email:"",
-        ceo:"",
-        paymentText:
-          "Der Rechnungsbetrag wurde bereits über das System von Vinted beglichen.\n" +
-          "Es liegt aufgrund des Kleinunternehmerstatus nach § 19 UStG eine Umsatzsteuerbefreiung vor.\n" +
-          "Das Rechnungsdatum entspricht dem Lieferdatum.\n" +
-          "Wir bedanken uns für den Auftrag und die angenehme Zusammenarbeit.",
-        footerText:"Es liegt aufgrund des Kleinunternehmerstatus nach § 19 UStG eine Umsatzsteuerbefreiung vor."
-      };
-
-      const tbody = document.getElementById("tbody");
-      const invoiceBody = document.getElementById("invoiceBody");
-
-      const itemDialog = document.getElementById("itemDialog");
-      const itemForm = document.getElementById("itemForm");
-
-      const invoiceDialog = document.getElementById("invoiceDialog");
-      const invoiceForm = document.getElementById("invoiceForm");
-      const invoicePositionsContainer = document.getElementById("invoicePositions");
-      const btnAddPosition = document.getElementById("btnAddPosition");
-
-      const photoDialog = document.getElementById("photoDialog");
-      const photoDialogImg = document.getElementById("photoDialogImg");
-
-      const noteDialog = document.getElementById("noteDialog");
-      const noteDialogText = document.getElementById("noteDialogText");
-
-      const firmDialog = document.getElementById("firmDialog");
-
-      const statCount = document.getElementById("statCount");
-      const statQty = document.getElementById("statQty");
-      const statTotal = document.getElementById("statTotal");
-      const statTotalEver = document.getElementById("statTotalEver");
-
-      const invoiceTotalRevenueEl = document.getElementById("invoiceTotalRevenue");
-      const invoiceTotalProfitEl = document.getElementById("invoiceTotalProfit");
-
-      /* NAV */
-      const navLager = document.getElementById("navLager");
-      const navRechnungen = document.getElementById("navRechnungen");
-      const viewLager = document.getElementById("view-lager");
-      const viewRechnungen = document.getElementById("view-rechnungen");
-
-      navLager.addEventListener("click", () => {
-        navLager.classList.add("active");
-        navRechnungen.classList.remove("active");
-        viewLager.style.display = "";
-        viewRechnungen.style.display = "none";
-      });
-
-      navRechnungen.addEventListener("click", () => {
-        navRechnungen.classList.add("active");
-        navLager.classList.remove("active");
-        viewLager.style.display = "none";
-        viewRechnungen.style.display = "";
-        renderInvoices();
-      });
-
-      /* Firmendaten laden */
-      loadFirmData();
-
-      /* Daten laden */
-      loadItems();
-      loadInvoices();
-      render();
-      renderInvoices();
-
-      /* Buttons / Events Lager */
-      document.getElementById("btnAdd").onclick = () => openItemDialog(null);
-      document.getElementById("btnCancelItem").onclick = () => itemDialog.close();
-      document.getElementById("btnSaveItem").onclick = () => saveItem();
-
-      document.getElementById("btnExportJson").onclick = () => exportJson({ items, invoices });
-      document.getElementById("btnQuickBackup").onclick = () => exportJson({ items, invoices });
-
-      document.getElementById("btnClosePhoto").onclick = () => photoDialog.close();
-      document.getElementById("btnOpenPhoto").onclick = () => {
-        if (!photoDialogImg.src) return;
-        window.open(photoDialogImg.src, "_blank");
-      };
-
-      document.getElementById("btnCloseNote").onclick = () => noteDialog.close();
-
-      document.getElementById("search").oninput = () => render();
-      document.getElementById("filterFlag").onchange = () => render();
-
-      document.getElementById("inputImport").onchange = async (e) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-        try {
-          const data = await importJson(file);
-          if (Array.isArray(data)) {
-            items = data;
-          } else if (data && typeof data === "object") {
-            if (Array.isArray(data.items)) items = data.items;
-            if (Array.isArray(data.invoices)) invoices = data.invoices;
-          }
-          saveItems();
-          saveInvoices();
-          render();
-          renderInvoices();
-          alert("Backup importiert.");
-        } catch (err) {
-          console.error(err);
-          alert("Fehler beim Import.");
-        } finally {
-          e.target.value = "";
-        }
-      };
-
-      /* Fotoauswahl */
-      document.getElementById("itemPhoto").addEventListener("change", (e) => {
-        const file = e.target.files?.[0];
-        const info = document.getElementById("itemPhotoInfo");
-        if (!file) {
-          tempPhotoDataUrl = null;
-          info.textContent = "Kein Foto ausgewählt";
-          return;
-        }
-        const reader = new FileReader();
-        reader.onload = () => {
-          tempPhotoDataUrl = reader.result;
-          info.textContent = "Foto ausgewählt";
-        };
-        reader.readAsDataURL(file);
-      });
-
-      /* Tabellenaktionen Lager */
-      tbody.addEventListener("click", (e) => {
-        const btn = e.target.closest("button");
-        if (!btn) return;
-
-        const id = btn.dataset.id;
-        const action = btn.dataset.action;
-        if (!id || !action) return;
-
-        const item = items.find(i => i.id === id);
-        if (!item) return;
-
-        switch (action) {
-          case "flag":
-            item.flagged = !item.flagged;
-            saveItems();
-            render();
-            break;
-          case "edit":
-            openItemDialog(id);
-            break;
-          case "photo":
-            if (item.photoDataUrl) {
-              photoDialogImg.src = item.photoDataUrl;
-              photoDialog.showModal();
-            }
-            break;
-          case "note":
-            if (item.note) {
-              noteDialogText.textContent = item.note;
-              noteDialog.showModal();
-            }
-            break;
-          case "delete":
-            if (confirm("Diesen Artikel wirklich löschen?")) {
-              items = items.filter(i => i.id !== id);
-              saveItems();
-              render();
-            }
-            break;
-          case "invoice":
-            openInvoiceDialogForItem(item);
-            break;
-        }
-      });
-
-      /* Menge direkt editieren im Lager */
-      document.addEventListener("input", (e) => {
-        if (!e.target.classList.contains("qty-input")) return;
-        const id = e.target.dataset.id;
-        const value = Number(e.target.value);
-        const item = items.find(i => i.id === id);
-        if (!item) return;
-
-        item.quantity = isNaN(value) ? 0 : value;
-        saveItems();
-        render();
-      });
-
-      /* Rechnungs-Dialog */
-      document.getElementById("btnCancelInvoice").onclick = () => {
-        invoiceDialog.close();
-        currentInvoiceItemId = null;
-      };
-      document.getElementById("btnSaveInvoice").onclick = () => saveInvoice();
-      btnAddPosition.onclick = () => createInvoicePositionRow(null, null);
-
-      /* Suche Rechnungen */
-      document.getElementById("invoiceSearch").oninput = () => renderInvoices();
-
-      /* Tabellenaktionen Rechnungen */
-      invoiceBody.addEventListener("click", (e) => {
-  const btn = e.target.closest("button");
-  if (!btn) return;
-  const id = btn.dataset.id;
-  const action = btn.dataset.action;
-  if (!id || !action) return;
-  const inv = invoices.find(r => r.id === id);
-  if (!inv) return;
-
-  switch (action) {
-    case "photos":
-      showInvoicePhotos(inv);
-      break;
-    case "view":
-      openInvoicePreview(inv, false);
-      break;
-    case "cancel":
-      handleCancelInvoice(inv);
-      break;
-    case "delete":
-      if (confirm("Diese Rechnung wirklich löschen?")) {
-        invoices = invoices.filter(r => r.id !== id);
-        saveInvoices();
-        renderInvoices();
+<!-- Artikel Popup -->
+<div id="popup-bg">
+<div class="popup">
+<h2>Artikel anlegen/bearbeiten</h2>
+<input id="p-nr" placeholder="Artikelnummer">
+<input id="p-name" placeholder="Name">
+<input id="p-date" type="date">
+<input id="p-where" placeholder="Wo gekauft?">
+<input id="p-price" type="number" placeholder="Preis">
+<input id="p-qty" type="number" placeholder="Menge">
+<textarea id="p-note" placeholder="Notiz"></textarea>
+<input id="p-img" type="file" multiple>
+<button onclick="saveItem()">Speichern</button>
+<button onclick="closePopup()">Abbrechen</button>
+</div>
+</div>
+
+<!-- Bild Popup -->
+<div id="img-popup-bg">
+<div id="img-popup">
+<img id="current-img" src="">
+<button onclick="closeImgPopup()">Schließen</button>
+</div>
+</div>
+
+<!-- Delete Popup -->
+<div id="del-popup-bg">
+<div id="del-popup">
+<p>Willst du den Artikel wirklich löschen?</p>
+<button id="del-yes">Ja</button>
+<button onclick="closeDelPopup()">Abbrechen</button>
+</div>
+</div>
+
+<script>
+// IndexedDB Setup
+let db;
+let request=indexedDB.open("LAGER_DB_FULL",1);
+request.onupgradeneeded=function(e){ e.target.result.createObjectStore("artikel",{keyPath:"nr"}); };
+request.onsuccess=function(e){ db=e.target.result; loadTable(); };
+
+// Popups
+function openPopup(nr=null){
+  document.getElementById("popup-bg").style.display="flex";
+  if(nr){
+    let tx=db.transaction("artikel","readonly");
+    let store=tx.objectStore("artikel");
+    store.get(nr).onsuccess=function(e){
+      let a=e.target.result;
+      if(a){
+        document.getElementById("p-nr").value=a.nr;
+        document.getElementById("p-name").value=a.name;
+        document.getElementById("p-date").value=a.date;
+        document.getElementById("p-where").value=a.where;
+        document.getElementById("p-price").value=a.price;
+        document.getElementById("p-qty").value=a.qty;
+        document.getElementById("p-note").value=a.note;
+        document.getElementById("p-img").value="";
       }
-      break;
+    };
+  } else {
+    let tx=db.transaction("artikel","readonly");
+    let store=tx.objectStore("artikel");
+    store.getAll().onsuccess=function(e){
+      let items=e.target.result;
+      let maxNr = 0;
+      items.forEach(i=>{
+        let n=parseInt(i.nr.split("-")[0]);
+        if(n>maxNr) maxNr=n;
+      });
+      document.getElementById("p-nr").value = String(maxNr+1).padStart(3,"0")+"-2025";
+      document.getElementById("p-name").value = "";
+      document.getElementById("p-date").value = "";
+      document.getElementById("p-where").value = "";
+      document.getElementById("p-price").value = "";
+      document.getElementById("p-qty").value = "";
+      document.getElementById("p-note").value = "";
+      document.getElementById("p-img").value = "";
+    };
   }
-});
-      /* Firmendaten-Button */
-      document.getElementById("btnFirmSettings").onclick = () => openFirmDialog();
-      document.getElementById("btnCancelFirm").onclick = () => firmDialog.close();
-      document.getElementById("btnSaveFirm").onclick = () => saveFirmDataFromForm();
-
-      /* Dialog öffnen Artikel */
-      function openItemDialog(id) {
-        currentItemId = id;
-        tempPhotoDataUrl = null;
-        itemForm.reset();
-        document.getElementById("itemPhotoInfo").textContent = "Kein Foto ausgewählt";
-
-        const flagEl = document.getElementById("itemFlagged");
-        if (flagEl) flagEl.checked = false;
-
-        if (id) {
-          const item = items.find(i => i.id === id);
-          if (item) {
-            setValue("itemNumber", item.articleNumber);
-            setValue("itemDate", item.purchaseDate);
-            setValue("itemName", item.name);
-            setValue("itemCondition", item.condition);
-            setValue("itemSize", item.size);
-            setValue("itemStore", item.store);
-            setValue("itemQty", item.quantity ?? 0);
-            setValue("itemPrice", item.price ?? 0);
-            setValue("itemNote", item.note || "");
-            if (flagEl) flagEl.checked = !!item.flagged;
-            if (item.photoDataUrl) {
-              document.getElementById("itemPhotoInfo").textContent = "Foto gespeichert (optional neues wählen)";
-            }
-          }
-        }
-        itemDialog.showModal();
-      }
-
-      /* Speichern Artikel */
-      function saveItem() {
-        const name = getValue("itemName").trim();
-        if (!name) {
-          alert("Bitte einen Artikelnamen eingeben.");
-          return;
-        }
-
-        const articleNumber = getValue("itemNumber").trim();
-        const purchaseDate = getValue("itemDate");
-        const condition = getValue("itemCondition");
-        const size = getValue("itemSize").trim();
-        const store = getValue("itemStore").trim();
-        const qty = Number(getValue("itemQty") || 0);
-        const price = Number(getValue("itemPrice") || 0);
-        const note = getValue("itemNote").trim();
-        const flagged = document.getElementById("itemFlagged")?.checked || false;
-
-        let item = currentItemId ? items.find(i => i.id === currentItemId) : null;
-        if (!item) {
-          item = { id: (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())) };
-          items.push(item);
-        }
-
-        item.articleNumber = articleNumber;
-        item.purchaseDate = purchaseDate;
-        item.name = name;
-        item.condition = condition;
-        item.size = size;
-        item.store = store;
-        item.quantity = qty;
-        item.price = price;
-        item.note = note;
-        item.flagged = flagged;
-
-        if (tempPhotoDataUrl) {
-          item.photoDataUrl = tempPhotoDataUrl;
-        }
-
-        saveItems();
-        render();
-        itemDialog.close();
-      }
-
-      /* Artikel-Storage */
-      function loadItems() {
-        try {
-          const raw = localStorage.getItem(ITEM_STORAGE_KEY);
-          items = raw ? JSON.parse(raw) : [];
-        } catch {
-          items = [];
-        }
-      }
-
-      function saveItems() {
-        localStorage.setItem(ITEM_STORAGE_KEY, JSON.stringify(items));
-      }
-
-      /* Rechnungs-Storage */
-      function loadInvoices() {
-        try {
-          const raw = localStorage.getItem(INVOICE_STORAGE_KEY);
-          invoices = raw ? JSON.parse(raw) : [];
-        } catch {
-          invoices = [];
-        }
-      }
-
-      function saveInvoices() {
-        localStorage.setItem(INVOICE_STORAGE_KEY, JSON.stringify(invoices));
-      }
-
-      /* Firmendaten laden/speichern */
-      function loadFirmData() {
-        try {
-          const raw = localStorage.getItem(FIRM_DATA_KEY);
-          if (raw) {
-            const parsed = JSON.parse(raw);
-            firmData = { ...firmData, ...parsed };
-          }
-        } catch (e) {
-          console.error("Fehler beim Laden der Firmendaten", e);
-        }
-      }
-
-      function saveFirmData() {
-        localStorage.setItem(FIRM_DATA_KEY, JSON.stringify(firmData));
-      }
-
-      function openFirmDialog() {
-        setValue("firmName", firmData.name || "");
-        setValue("firmStreet", firmData.street || "");
-        setValue("firmZipCity", firmData.zipCity || "");
-        setValue("firmCountry", firmData.country || "");
-        setValue("firmUstId", firmData.ustId || "");
-        setValue("firmEmail", firmData.email || "");
-        setValue("firmCeo", firmData.ceo || "");
-        document.getElementById("firmPaymentText").value = firmData.paymentText || "";
-        document.getElementById("firmFooterText").value = firmData.footerText || "";
-
-        firmDialog.showModal();
-      }
-
-      function saveFirmDataFromForm() {
-        firmData.name = getValue("firmName").trim();
-        firmData.street = getValue("firmStreet").trim();
-        firmData.zipCity = getValue("firmZipCity").trim();
-        firmData.country = getValue("firmCountry").trim();
-        firmData.ustId = getValue("firmUstId").trim();
-        firmData.email = getValue("firmEmail").trim();
-        firmData.ceo = getValue("firmCeo").trim();
-        firmData.paymentText = document.getElementById("firmPaymentText").value.trim();
-        firmData.footerText = document.getElementById("firmFooterText").value.trim();
-
-        saveFirmData();
-        firmDialog.close();
-      }
-
-      /* Rendering Lager */
-      function render() {
-        tbody.innerHTML = "";
-
-        const search = document.getElementById("search").value.toLowerCase();
-        const filterFlag = document.getElementById("filterFlag").value;
-
-        const filtered = items.filter(i => {
-          if (filterFlag === "flagged" && !i.flagged) return false;
-
-          const hay = (
-            (i.name || "") + " " +
-            (i.articleNumber || "") + " " +
-            (i.condition || "") + " " +
-            (i.size || "") + " " +
-            (i.store || "") + " " +
-            (i.note || "")
-          ).toLowerCase();
-
-          if (search && !hay.includes(search)) return false;
-          return true;
-        });
-
-        if (!filtered.length) {
-          const tr = document.createElement("tr");
-          tr.innerHTML = '<td colspan="13" style="text-align:center;padding:0.4rem;font-size:0.6rem;">Keine Artikel</td>';
-          tbody.appendChild(tr);
-          updateStats();
-          return;
-        }
-
-        for (const item of filtered) {
-          const tr = document.createElement("tr");
-          if (item.flagged) tr.classList.add("flagged");
-
-          const qty = Number(item.quantity || 0);
-          const price = Number(item.price || 0);
-          const total = qty * price;
-
-          tr.innerHTML = `
-  <td>${item.flagged ? "⭐" : ""}</td>
-  <td>${escapeHtml(item.articleNumber || "")}</td>
-  <td>${escapeHtml(item.name || "")}</td>
-  <td>${escapeHtml(item.condition || "")}</td>
-  <td>${escapeHtml(item.size || "")}</td>
-  <td>${escapeHtml(item.store || "")}</td>
-  <td>
-    <input type="number" min="0" value="${qty}" class="qty-input" data-id="${item.id}">
-    ${qty <= 1 ? '<span class="badge-low">niedrig</span>' : ""}
-  </td>
-  <td>${price.toFixed(2).replace(".", ",")}</td>
-  <td>${total.toFixed(2).replace(".", ",")}</td>
-  <td>${escapeHtml(item.purchaseDate || "")}</td>
-  <td>
-    ${item.photoDataUrl ? `<button class="icon-btn" data-action="photo" data-id="${item.id}" title="Foto ansehen">📷</button>` : '<span class="text-muted">–</span>'}
-  </td>
-  <td>
-    ${item.note ? `<button class="icon-btn" data-action="note" data-id="${item.id}" title="Notiz anzeigen">📝</button>` : '<span class="text-muted">–</span>'}
-  </td>
-  <td>
-    <div class="actions-cell">
-      <button class="icon-btn" data-action="flag" data-id="${item.id}" title="Markieren">⭐</button>
-      <button class="icon-btn" data-action="edit" data-id="${item.id}" title="Bearbeiten">✏️</button>
-      <button class="icon-btn" data-action="invoice" data-id="${item.id}" title="Rechnung erstellen">💶</button>
-      <button class="icon-btn danger" data-action="delete" data-id="${item.id}" title="Löschen">🗑️</button>
-    </div>
-  </td>
-`;
-          tbody.appendChild(tr);
-        }
-
-        updateStats();
-      }
-
-      function updateStats() {
-        const count = items.length;
-        const totalQty = items.reduce((sum, i) => sum + Number(i.quantity || 0), 0);
-        const currentStockValue = items.reduce((sum, i) => {
-          const qty = Number(i.quantity || 0);
-          const price = Number(i.price || 0);
-          return sum + qty * price;
-        }, 0);
-
-        // Einkaufskosten aller verkauften, nicht stornierten Artikel
-        const activeInvoices = invoices.filter(inv => !inv.cancelled);
-        const soldCost = activeInvoices.reduce((sum, inv) => {
-          if (Array.isArray(inv.positions) && inv.positions.length) {
-            return sum + inv.positions.reduce((s,p) => s + Number(p.lineCost || (p.unitPurchasePrice || 0) * (p.quantity || 0)), 0);
-          } else {
-            const qty = Number(inv.quantity || 0);
-            const unitPurchase = Number(inv.unitPurchasePrice || 0);
-            return sum + qty * unitPurchase;
-          }
-        }, 0);
-
-        const totalEver = currentStockValue + soldCost;
-
-        statCount.textContent = count;
-        statQty.textContent = totalQty;
-        statTotal.textContent = currentStockValue.toFixed(2).replace(".", ",") + " €";
-        statTotalEver.textContent = totalEver.toFixed(2).replace(".", ",") + " €";
-      }
-
-      /* Positionen im Rechnungsdialog */
-      function createInvoicePositionRow(defaultItem, defaultPrice) {
-        const row = document.createElement("div");
-        row.className = "invoice-pos-row";
-
-        const options = items
-          .map(it => `<option value="${it.id}">${escapeHtml(it.name || "")}${it.articleNumber ? " ("+escapeHtml(it.articleNumber)+")" : ""}</option>`)
-          .join("");
-
-        const unit = typeof defaultPrice === "number" ? defaultPrice : 0;
-
-        row.innerHTML = `
-          <div style="flex:2;display:flex;flex-direction:column;gap:4px;">
-            <span style="font-size:0.65rem;color:var(--muted);">Artikel</span>
-            <select class="inv-pos-item">
-              <option value="">Artikel wählen …</option>
-              ${options}
-            </select>
-          </div>
-
-          <div style="width:80px;display:flex;flex-direction:column;gap:4px;">
-            <span style="font-size:0.65rem;color:var(--muted);">Menge</span>
-            <input type="number" class="inv-pos-qty" min="1" value="1">
-          </div>
-
-          <div style="width:110px;display:flex;flex-direction:column;gap:4px;">
-            <span style="font-size:0.65rem;color:var(--muted);">Preis/Stk</span>
-            <input type="number" class="inv-pos-unit" step="0.01" min="0" value="${unit.toFixed(2)}">
-          </div>
-
-          <div style="width:40px;display:flex;align-items:flex-end;">
-            <button type="button" class="icon-btn danger inv-pos-remove">🗑️</button>
-          </div>
-        `;
-
-        const selectEl = row.querySelector(".inv-pos-item");
-        const removeBtn = row.querySelector(".inv-pos-remove");
-        if (defaultItem && defaultItem.id) {
-          selectEl.value = defaultItem.id;
-        }
-
-        removeBtn.onclick = () => row.remove();
-
-        invoicePositionsContainer.appendChild(row);
-      }
-
-      /* Rechnungen: Dialog öffnen */
-      function openInvoiceDialogForItem(item) {
-        currentInvoiceItemId = item.id;
-        invoiceForm.reset();
-        invoicePositionsContainer.innerHTML = "";
-
-        // Erste Position mit dem gewählten Artikel vorbelegen
-        createInvoicePositionRow(item, Number(item.price || 0));
-
-        const today = new Date().toISOString().slice(0,10);
-        document.getElementById("invSaleDate").value = today;
-        document.getElementById("invBuyerFull").value = "";
-
-        invoiceDialog.showModal();
-      }
-
-      /* Rechnungen: Speichern */
-      function saveInvoice() {
-        const saleDate = document.getElementById("invSaleDate").value || new Date().toISOString().slice(0,10);
-        const buyerFull = document.getElementById("invBuyerFull").value.trim();
-        const platform = document.getElementById("invPlatform").value.trim();
-        const paymentMethod = document.getElementById("invPaymentMethod").value.trim();
-
-        // Käufer in Name/Adresse/Ort aufsplitten (intern), aber alles bleibt in buyerFull
-        let buyerName = "";
-        let buyerAddress = "";
-        let buyerCity = "";
-        if (buyerFull) {
-          const lines = buyerFull.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-          buyerName = lines[0] || "";
-          buyerAddress = lines[1] || "";
-          buyerCity = lines.slice(2).join(", ");
-        }
-
-        // Positionen einsammeln
-        const rows = invoicePositionsContainer.querySelectorAll(".invoice-pos-row");
-        const positions = [];
-        const itemQtyMap = new Map();
-
-        rows.forEach(row => {
-          const itemId = row.querySelector(".inv-pos-item").value;
-          const qty = Number(row.querySelector(".inv-pos-qty").value || 0);
-          const unitSale = Number(row.querySelector(".inv-pos-unit").value || 0);
-
-          if (!itemId || qty <= 0 || unitSale <= 0) return;
-
-          const it = items.find(i => i.id === itemId);
-          const articleName = it?.name || "";
-          const articleNumber = it?.articleNumber || "";
-          const unitPurchase = Number(it?.price || 0);
-
-          const lineTotal = qty * unitSale;
-          const lineCost = qty * unitPurchase;
-          const lineProfit = lineTotal - lineCost;
-
-          positions.push({
-            itemId,
-            articleName,
-            articleNumber,
-            quantity: qty,
-            unitSalePrice: unitSale,
-            lineTotal,
-            unitPurchasePrice: unitPurchase,
-            lineCost,
-            lineProfit
-          });
-
-          itemQtyMap.set(itemId, (itemQtyMap.get(itemId) || 0) + qty);
-        });
-
-        if (!positions.length) {
-          alert("Bitte mindestens eine Position mit Artikel, Menge und Preis/Stk eingeben.");
-          return;
-        }
-
-        // Rechnungsnummer
-        let counter = 0;
-        try {
-          counter = Number(localStorage.getItem(INVOICE_COUNTER_KEY) || "0");
-        } catch { counter = 0; }
-        counter += 1;
-        localStorage.setItem(INVOICE_COUNTER_KEY, String(counter));
-
-        const totalRevenue = positions.reduce((sum, p) => sum + Number(p.lineTotal || 0), 0);
-        const totalProfit = positions.reduce((sum, p) => sum + Number(p.lineProfit || 0), 0);
-        const totalCost = positions.reduce((sum, p) => sum + Number(p.lineCost || 0), 0);
-
-        const invoice = {
-          id: (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())),
-          number: counter,
-          saleDate,
-          createdAt: new Date().toISOString(),
-          buyerFull,
-          buyerName,
-          buyerAddress,
-          buyerCity,
-          platform,
-          paymentMethod,
-          positions,
-          salePrice: totalRevenue,
-          profit: totalProfit,
-          totalCost,
-          cancelled: false
-        };
-
-        // erste Position zusätzlich in alte Felder für Abwärtskompatibilität
-        const first = positions[0];
-        if (first) {
-          invoice.articleId = first.itemId;
-          invoice.articleName = first.articleName;
-          invoice.articleNumber = first.articleNumber;
-          invoice.quantity = first.quantity;
-          invoice.unitPurchasePrice = first.unitPurchasePrice;
-        }
-
-        invoices.push(invoice);
-        saveInvoices();
-
-        // Lagerbestand pro Artikel reduzieren
-        itemQtyMap.forEach((qty, itemId) => {
-          const it = items.find(i => i.id === itemId);
-          if (it) {
-            const currentQty = Number(it.quantity || 0);
-            it.quantity = Math.max(0, currentQty - qty);
-          }
-        });
-        saveItems();
-
-        render();
-        renderInvoices();
-        invoiceDialog.close();
-
-        if (confirm("Rechnung wurde erstellt. Direkt anzeigen?")) {
-          openInvoicePreview(invoice, false);
-        }
-      }
-
-      /* Storno */
-      function handleCancelInvoice(inv) {
-        if (inv.cancelled) {
-          alert("Diese Rechnung ist bereits storniert.");
-          return;
-        }
-        if (!confirm("Diese Rechnung stornieren und den Lagerbestand zurückbuchen?")) {
-          return;
-        }
-
-        // Lager wieder auffüllen nach Positionen
-        if (Array.isArray(inv.positions) && inv.positions.length) {
-          inv.positions.forEach(p => {
-            const item = items.find(i => i.id === p.itemId);
-            const qty = Number(p.quantity || 0);
-            const unitPurchase = Number(p.unitPurchasePrice || 0);
-            if (item) {
-              const currentQty = Number(item.quantity || 0);
-              item.quantity = currentQty + qty;
-            } else if (qty > 0) {
-              const newItem = {
-                id: (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())),
-                articleNumber: p.articleNumber || "",
-                purchaseDate: "",
-                name: p.articleName || "",
-                condition: "",
-                size: "",
-                store: "",
-                quantity: qty,
-                price: unitPurchase,
-                note: "Automatisch durch Storno wieder angelegt",
-                flagged: false
-              };
-              items.push(newItem);
-            }
-          });
-        } else {
-          // Alte Einzelposition-Logik
-          const qty = Number(inv.quantity || 0);
-          const unitPurchase = Number(inv.unitPurchasePrice || 0);
-          let item = items.find(i => i.id === inv.articleId);
-          if (item) {
-            const currentQty = Number(item.quantity || 0);
-            item.quantity = currentQty + qty;
-          } else if (qty > 0) {
-            item = {
-              id: (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())),
-              articleNumber: inv.articleNumber || "",
-              purchaseDate: "",
-              name: inv.articleName || "",
-              condition: "",
-              size: "",
-              store: "",
-              quantity: qty,
-              price: unitPurchase,
-              note: "Automatisch durch Storno wieder angelegt",
-              flagged: false
-            };
-            items.push(item);
-          }
-        }
-
-        // Rechnung als storniert markieren
-        inv.cancelled = true;
-        inv.profit = 0;
-
-        saveItems();
-        saveInvoices();
-        render();
-        renderInvoices();
-      }
-
-      /* Rendering Rechnungen */
-      function renderInvoices() {
-        invoiceBody.innerHTML = "";
-
-        const search = document.getElementById("invoiceSearch").value.toLowerCase();
-
-        const filtered = invoices
-          .slice()
-          .sort((a,b) => (b.number || 0) - (a.number || 0))
-          .filter(inv => {
-            if (!search) return true;
-            const firstPosName = Array.isArray(inv.positions) && inv.positions.length
-              ? inv.positions[0].articleName || ""
-              : inv.articleName || "";
-
-            const hay = `
-              ${inv.number || ""}
-              ${inv.saleDate || ""}
-              ${inv.buyerName || ""}
-              ${inv.buyerCity || ""}
-              ${firstPosName}
-              ${inv.platform || ""}
-              ${inv.paymentMethod || ""}
-            `.toLowerCase();
-            return hay.includes(search);
-          });
-
-        if (!filtered.length) {
-          const tr = document.createElement("tr");
-          tr.innerHTML = '<td colspan="10" style="text-align:center;padding:0.4rem;font-size:0.6rem;">Keine Rechnungen</td>';
-          invoiceBody.appendChild(tr);
-          updateInvoiceStats();
-          return;
-        }
-
-        for (const inv of filtered) {
-          const tr = document.createElement("tr");
-          if (inv.cancelled) tr.classList.add("cancelled");
-
-          const revenue = Number(inv.salePrice || 0);
-          const profit = Number(inv.profit || 0);
-
-          // Artikel-Anzeige: erster Artikel + Hinweis auf weitere
-          let articleText = "";
-          let totalQty = 0;
-          if (Array.isArray(inv.positions) && inv.positions.length) {
-            const first = inv.positions[0];
-            articleText = escapeHtml(first.articleName || "");
-            if (inv.positions.length > 1) {
-              articleText += ` (+${inv.positions.length - 1} weitere)`;
-            }
-            totalQty = inv.positions.reduce((s,p) => s + Number(p.quantity || 0), 0);
-          } else {
-            articleText = escapeHtml(inv.articleName || "");
-            totalQty = Number(inv.quantity || 0);
-          }
-
-          const customerName = inv.buyerName || "";
-          const customerCell = inv.cancelled
-            ? `<div>${escapeHtml(customerName)}</div><div class="storno-label">❌ Storniert</div>`
-            : escapeHtml(customerName);
-
-          tr.innerHTML = `
-            <td>${inv.number || ""}</td>
-            <td>${escapeHtml(inv.saleDate || "")}</td>
-            <td>${customerCell}</td>
-            <td>${articleText}</td>
-            <td>${totalQty}</td>
-            <td>${revenue.toFixed(2).replace(".", ",")}</td>
-            <td>${profit.toFixed(2).replace(".", ",")}</td>
-            <td>${escapeHtml(inv.platform || "")}</td>
-            <td>${escapeHtml(inv.paymentMethod || "")}</td>
-            <td>
-              <div class="actions-cell">
-                <button class="icon-btn" data-action="photos" data-id="${inv.id}" title="Artikel-Fotos anzeigen">📷</button>
-                <button class="icon-btn" data-action="view" data-id="${inv.id}" title="Rechnung anzeigen / speichern">🧾</button>
-                <button class="icon-btn" data-action="cancel" data-id="${inv.id}" title="Stornieren / Lager rückbuchen" ${inv.cancelled ? "disabled" : ""}>↩️</button>
-                <button class="icon-btn danger" data-action="delete" data-id="${inv.id}" title="Löschen">🗑️</button>
-              </div>
-            </td>
-          `;
-          invoiceBody.appendChild(tr);
-        }
-
-        updateInvoiceStats();
-      }
-
-      function updateInvoiceStats() {
-        const activeInvoices = invoices.filter(inv => !inv.cancelled);
-
-        const totalRevenue = activeInvoices.reduce((sum, inv) => sum + Number(inv.salePrice || 0), 0);
-        const totalProfit = activeInvoices.reduce((sum, inv) => sum + Number(inv.profit || 0), 0);
-        invoiceTotalRevenueEl.textContent = totalRevenue.toFixed(2).replace(".", ",") + " €";
-        invoiceTotalProfitEl.textContent = totalProfit.toFixed(2).replace(".", ",") + " €";
-      }
-
-      /* Fotos zur Rechnung anzeigen */
-      function showInvoicePhotos(inv) {
-        const win = window.open("", "_blank");
-        if (!win) return;
-
-        const photoList = [];
-
-        if (Array.isArray(inv.positions)) {
-          inv.positions.forEach(pos => {
-            const item = items.find(i => i.id === pos.itemId);
-            if (item && item.photoDataUrl) {
-              photoList.push({
-                name: item.name || pos.articleName || "Artikel",
-                img: item.photoDataUrl
-              });
-            }
-          });
-        }
-
-        if (!photoList.length) {
-          win.document.write("<p style='font-family:system-ui,sans-serif;padding:20px;'>Keine Fotos für diese Rechnung gefunden.</p>");
-          win.document.close();
-          return;
-        }
-
-        win.document.write(`
-          <html>
-            <head>
-              <meta charset="UTF-8">
-              <title>Bilder zur Rechnung ${inv.number || ""}</title>
-              <style>
-                body{
-                  font-family:system-ui,sans-serif;
-                  padding:16px;
-                }
-                button{
-                  padding:6px 12px;
-                  font-size:10pt;
-                  margin-bottom:12px;
-                }
-                .imgbox{
-                  margin-bottom:20px;
-                }
-                img{
-                  max-width:95%;
-                  height:auto;
-                  border:1px solid #666;
-                  border-radius:6px;
-                  display:block;
-                  margin-bottom:6px;
-                }
-                h3{
-                  margin:0 0 6px;
-                  font-size:11pt;
-                }
-                p{
-                  margin:0;
-                  font-size:9pt;
-                  color:#555;
-                }
-              </style>
-            </head>
-            <body>
-              <button onclick="window.close()">Zurück</button>
-        `);
-
-        photoList.forEach(p => {
-          win.document.write(`
-            <div class="imgbox">
-              <h3>${p.name}</h3>
-              <a href="${p.img}" download="${p.name.replace(/[^a-z0-9]/gi,'_')}.jpg">
-                <img src="${p.img}">
-              </a>
-              <p>Zum Speichern Bild öffnen oder lange gedrückt halten (iPhone → „Zu Fotos hinzufügen“).</p>
-            </div>
-          `);
-        });
-
-        win.document.write(`</body></html>`);
-        win.document.close();
-      }
-
-    /* ---------- RECHNUNGSANSICHT + BILDER (PDF + Download/Print) ---------- */
-function showInvoicePhotos(inv) {
-  const win = window.open("", "_blank");
-  if (!win) return;
-
-  const photoList = [];
-  if (Array.isArray(inv.positions)) {
-    inv.positions.forEach(pos => {
-      const item = items.find(i => i.id === pos.itemId);
-      if (item && item.photoDataUrl) {
-        photoList.push({ name: item.name || "Bild", img: item.photoDataUrl });
-      }
+}
+function closePopup(){document.getElementById("popup-bg").style.display="none";}
+
+// Save Item
+function saveItem(){
+  let nr=document.getElementById("p-nr").value.trim();
+  if(!nr){ alert("Artikelnummer darf nicht leer sein"); return; }
+  let name=document.getElementById("p-name").value.trim();
+  let date=document.getElementById("p-date").value;
+  let where=document.getElementById("p-where").value.trim();
+  let price=parseFloat(document.getElementById("p-price").value)||0;
+  let qty=parseInt(document.getElementById("p-qty").value)||0;
+  let note=document.getElementById("p-note").value;
+  let files=document.getElementById("p-img").files;
+  let images=[];
+
+  function saveToDB(){
+    let tx=db.transaction("artikel","readwrite");
+    let store=tx.objectStore("artikel");
+    store.put({nr,name,date,where,price,qty,note,images});
+    tx.oncomplete=function(){ closePopup(); loadTable(); };
+  }
+
+  if(files.length===0){ saveToDB(); return; }
+  let loaded=0;
+  for(let i=0;i<files.length;i++){
+    let reader=new FileReader();
+    reader.onload=function(e){
+      let img=new Image();
+      img.onload=function(){
+        let canvas=document.createElement("canvas");
+        let scale=800/img.width;
+        canvas.width=800; canvas.height=img.height*scale;
+        let ctx=canvas.getContext("2d");
+        ctx.drawImage(img,0,0,canvas.width,canvas.height);
+        images.push(canvas.toDataURL("image/jpeg",0.7));
+        loaded++;
+        if(loaded===files.length) saveToDB();
+      };
+      img.src=e.target.result;
+    };
+    reader.readAsDataURL(files[i]);
+  }
+}
+
+// Load Table
+function loadTable(){
+  let body=document.querySelector("#tbl tbody");
+  body.innerHTML="";
+  let tx=db.transaction("artikel","readonly");
+  let store=tx.objectStore("artikel");
+  store.getAll().onsuccess=function(e){
+    let items=e.target.result||[];
+    document.getElementById("countArtikel").innerText=items.length;
+    let totalQty=0, wert=0;
+    items.forEach(a=>{ totalQty+=a.qty; wert+=a.qty*a.price; });
+    document.getElementById("gesamtMenge").innerText=totalQty;
+    document.getElementById("wertGelagert").innerText=wert.toFixed(2)+" €";
+    document.getElementById("wertInsgesamt").innerText=wert.toFixed(2)+" €";
+
+    items.forEach(a=>{
+      let dateParts=a.date.split("-");
+      let dateFormatted=(dateParts[2]||"")+"-"+(dateParts[1]||"")+"-"+(dateParts[0]||"");
+      let tr=document.createElement("tr");
+      tr.innerHTML=`<td>${a.nr}</td><td>${a.name}</td>
+      <td><input type="number" value="${a.qty}" style="width:50px" onchange="updateQty('${a.nr}',this.value)"></td>
+      <td>${a.price}</td>
+      <td>${(a.qty*a.price).toFixed(2)}</td>
+      <td>${a.where}</td>
+      <td>${dateFormatted}</td>
+      <td><button class="icon-btn" onclick='alert("Bilder ansehen: ${a.images.length} Bilder")'>🖼</button></td>
+      <td>
+        <button class="icon-btn" onclick="alert('Notiz: ${a.note}')">📝</button>
+        <button class="icon-btn" onclick="toggleMark(this)">✔</button>
+        <button class="icon-btn" onclick="openPopup('${a.nr}')">✎</button>
+        <button class="icon-btn" onclick="confirmDel('${a.nr}')">🗑</button>
+      </td>`;
+      body.appendChild(tr);
     });
-  }
+  };
+}
 
-  if (photoList.length === 0) {
-    win.document.write("<p style='font-family:sans-serif;padding:20px;'>Keine Fotos für diese Rechnung gefunden.</p>");
-    win.document.close();
-    return;
-  }
+// Menge ändern
+function updateQty(nr,val){
+  let tx=db.transaction("artikel","readwrite");
+  let store=tx.objectStore("artikel");
+  store.get(nr).onsuccess=function(e){
+    let a=e.target.result;
+    a.qty=parseInt(val)||0;
+    store.put(a);
+    tx.oncomplete=loadTable;
+  };
+}
 
-  win.document.write(`
-    <html><head><meta charset="UTF-8"><title>Bilder zur Rechnung ${inv.number}</title>
-    <style>
-      body{font-family:system-ui, sans-serif;padding:18px;color:#000}
-      .imgbox{margin-bottom:20px}
-      img{max-width:95%;height:auto;border:1px solid #666;border-radius:6px}
-      a.savebtn{display:inline-block;margin-top:6px;padding:6px 10px;border:1px solid #444;border-radius:6px;text-decoration:none;color:#000;background:#eee}
-    </style>
-    </head><body>
-    <button onclick="window.close()">Zurück</button>
-  `);
+// Markieren
+function toggleMark(btn){let tr=btn.closest("tr");tr.classList.toggle("marked");}
 
-  photoList.forEach(p => {
-    win.document.write(`
-      <div class="imgbox">
-        <h3>${escapeHtml(p.name)}</h3>
-        <a class="savebtn" download="${p.name}.jpg" href="${p.img}">Bild speichern</a>
-        <div><img src="${p.img}" alt="${escapeHtml(p.name)}"></div>
-        <p style="font-size:0.9rem;color:#444">iPhone: Bild gedrückt halten → "In Fotos sichern"</p>
-      </div>
-    `);
+// Löschen
+let delNr="";
+function confirmDel(nr){delNr=nr;document.getElementById("del-popup-bg").style.display="flex";}
+document.getElementById("del-yes").onclick=function(){delItem(delNr);closeDelPopup();}
+function closeDelPopup(){document.getElementById("del-popup-bg").style.display="none";}
+function delItem(id){let tx=db.transaction("artikel","readwrite");let store=tx.objectStore("artikel");store.delete(id);tx.oncomplete=loadTable;}
+
+// Backup Download
+function exportBackup(){
+  if(!db) return;
+  let tx=db.transaction("artikel","readonly");
+  let store=tx.objectStore("artikel");
+  store.getAll().onsuccess=function(e){
+    let items=e.target.result||[];
+    let blob=new Blob([JSON.stringify(items)],{type:"application/json"});
+    let a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download="backup.json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+}
+
+// Import Backup
+function importBackup(){
+  let inp=document.createElement("input");inp.type="file";inp.accept="application/json";
+  inp.onchange=function(){let file=inp.files[0];let reader=new FileReader();
+    reader.onload=function(e){let items=JSON.parse(e.target.result);
+      let tx=db.transaction("artikel","readwrite");let store=tx.objectStore("artikel");
+      items.forEach(i=>store.put(i));
+      tx.oncomplete=()=>{loadTable();};};
+    reader.readAsText(file);};
+  inp.click();
+}
+
+// PDF Inventur
+async function generatePDF(){
+  if(!db)return;
+  const { jsPDF } = window.jspdf;
+  const doc=new jsPDF();
+  let y=10; doc.setFontSize(12);
+  doc.text("Inventur",10,y); y+=8;
+  doc.text("Nr | Name | Menge | Preis | Wert | Wo gekauft | Datum",10,y); y+=6;
+  let tx=db.transaction("artikel","readonly");
+  let store=tx.objectStore("artikel");
+  const items=await new Promise(resolve=>store.getAll().onsuccess=e=>resolve(e.target.result));
+  items.forEach(a=>{
+    let dateParts=a.date.split("-");
+    let dateFormatted=(dateParts[2]||"")+"/"+(dateParts[1]||"")+"/"+(dateParts[0]||"");
+    let line=`${a.nr} | ${a.name} | ${a.qty} | ${a.price} | ${(a.qty*a.price).toFixed(2)} | ${a.where} | ${dateFormatted}`;
+    y+=6; if(y>280){doc.addPage(); y=10;}
+    doc.text(line,10,y);
   });
-
-  win.document.write("</body></html>");
-  win.document.close();
+  let blob=doc.output("blob");
+  let link=document.createElement("a");
+  link.href=URL.createObjectURL(blob);
+  link.download="inventur.pdf";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }
 
-function openInvoicePreview(inv, autoPrint) {
-  const win = window.open("", "_blank");
-  if (!win) return;
-
-  const revenue = Number(inv.salePrice || 0);
-
-  // Firmendaten
-  const firmName = escapeHtml(firmData.name || "");
-  const firmStreet = escapeHtml(firmData.street || "");
-  const firmZipCity = escapeHtml(firmData.zipCity || "");
-  const firmCountry = escapeHtml(firmData.country || "");
-  const paymentTextHtml = (firmData.paymentText || "").split("\n").map(ln => escapeHtml(ln)).join("<br>");
-  const footerTextHtml = escapeHtml(firmData.footerText || "");
-  const firmMeta = [
-    firmData.email ? escapeHtml(firmData.email) : "",
-    firmData.ustId ? "USt-ID: " + escapeHtml(firmData.ustId) : "",
-    firmData.ceo ? "Geschäftsführer: " + escapeHtml(firmData.ceo) : ""
-  ].filter(Boolean).join(" · ");
-
-  // Käuferblock (alles in einem Feld, Zeilen bleiben)
-  const buyerBlock = (inv.buyerFull || "").split(/\r?\n/).map(ln => escapeHtml(ln)).join("<br>");
-  const createdDate = new Date(inv.createdAt || inv.saleDate || "").toLocaleDateString("de-DE");
-
-  // Positionen (Artikelname wird bei Bedarf in zwei Zeilen umgebrochen)
-  let positions = Array.isArray(inv.positions) && inv.positions.length ? inv.positions : [{
-    articleName: inv.articleName || "",
-    articleNumber: inv.articleNumber || "",
-    quantity: Number(inv.quantity || 0) || 1,
-    unitSalePrice: revenue / (Number(inv.quantity || 1)),
-    lineTotal: revenue
-  }];
-
-  const rowsHtml = positions.map(p => {
-    // Wrap long article name into max ~48 chars then break (keine harte Abhängigkeit, einfache Lösung)
-    const name = escapeHtml(String(p.articleName || ""));
-    const wrapped = name.length > 48 ? name.slice(0,48) + "<br>" + escapeHtml(name.slice(48)) : name;
-    return `
-      <tr>
-        <td style="vertical-align:top;">${wrapped}</td>
-        <td style="vertical-align:top;">${escapeHtml(p.articleNumber || "")}</td>
-        <td style="text-align:right;vertical-align:top;">${Number(p.quantity || 0)}</td>
-        <td style="text-align:right;vertical-align:top;">${Number(p.unitSalePrice || 0).toFixed(2).replace(".", ",")}</td>
-        <td style="text-align:right;vertical-align:top;">${Number(p.lineTotal || (p.quantity * p.unitSalePrice)).toFixed(2).replace(".", ",")}</td>
-      </tr>
-    `;
-  }).join("");
-
-  win.document.write(`
-  <html>
-    <head><meta charset="utf-8"><title>Rechnung ${inv.number}</title>
-    <style>
-      body{font-family:Arial, Helvetica, sans-serif;font-size:11pt;color:#000;background:#fff;padding:18mm}
-      .toolbar-print{display:flex;justify-content:flex-end;gap:10px;margin-bottom:12px}
-      .from-line{font-size:10pt;border-bottom:1px solid #000;padding-bottom:2mm;margin-bottom:4mm}
-      .meta-right{float:right;text-align:right;font-size:10.5pt;margin-top:-28mm}
-      .customer-block{margin-bottom:8mm}
-      h1{font-size:18pt;margin:8mm 0 6mm}
-      table{width:100%;border-collapse:collapse;margin-bottom:8mm}
-      th,td{border:1px solid #000;padding:6px 8px}
-      th{background:#f4f4f4}
-      .sum-block{text-align:right;font-size:13pt;margin-bottom:12mm}
-      .payment-text{font-size:10pt;margin-bottom:10mm;color:#222}
-      .bottom-line{border-top:1px solid #000;margin-top:12mm;padding-top:6mm}
-      .footer{font-size:9pt;color:#444}
-      @media print{.toolbar-print{display:none}}
-    </style>
-    </head>
-    <body>
-      <div class="toolbar-print">
-        <button onclick="window.close()">Zurück</button>
-        <button onclick="window.print()">Drucken / Speichern</button>
-      </div>
-
-      <div class="from-line">${firmName}${firmStreet ? ", " + firmStreet : ""}${firmZipCity ? ", " + firmZipCity : ""}${firmCountry ? ", " + firmCountry : ""}</div>
-
-      <div class="customer-block">${buyerBlock}</div>
-
-      <div class="meta-right">
-        <div><b>Rechnungsnummer</b></div>
-        <div>${inv.number || ""}</div>
-        <div style="height:6px"></div>
-        <div><b>Rechnungsdatum</b></div>
-        <div>${createdDate}</div>
-        <div style="height:6px"></div>
-        <div><b>Lieferdatum</b></div>
-        <div>${escapeHtml(inv.saleDate || "")}</div>
-      </div>
-
-      <h1>Rechnung</h1>
-
-      <p style="margin-bottom:6mm">Hiermit berechnen wir Ihnen folgende Lieferungen/Leistungen</p>
-
-      <table><thead>
-        <tr>
-          <th>Bezeichnung</th>
-          <th>Art.-Nr.</th>
-          <th>Menge</th>
-          <th>Einzel €</th>
-          <th>Gesamt €</th>
-        </tr>
-      </thead>
-      <tbody>${rowsHtml}</tbody></table>
-
-      <div class="sum-block"><b>Rechnung gesamt:</b> ${revenue.toFixed(2).replace(".", ",")} €</div>
-
-      <div class="payment-text">${paymentTextHtml}</div>
-
-      <div class="bottom-line"></div>
-      <div class="footer">${firmMeta}</div>
-
-      ${autoPrint ? "<script>window.print();<\/script>" : ""}
-    </body>
-  </html>
-  `);
-
-  win.document.close();
+// Suche
+function searchTable(){
+  let val=document.getElementById("search").value.toLowerCase();
+  document.querySelectorAll("#tbl tbody tr").forEach(tr=>{tr.style.display=tr.innerText.toLowerCase().includes(val)?"":"none";});
 }
 
-      /* Backup JSON */
-      function exportJson(obj) {
-        const blob = new Blob([JSON.stringify(obj, null, 2)], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "lagerpro-v4-backup.json";
-        a.click();
-        URL.revokeObjectURL(url);
-      }
-
-      function importJson(file) {
-        return new Promise((resolve, reject) => {
-          const r = new FileReader();
-          r.onload = () => {
-            try { resolve(JSON.parse(r.result)); }
-            catch (e) { reject(e); }
-          };
-          r.onerror = reject;
-          r.readAsText(file);
-        });
-      }
-
-      /* Helper */
-      function getValue(id) {
-        const el = document.getElementById(id);
-        return el ? el.value : "";
-      }
-      function setValue(id,v) {
-        const el = document.getElementById(id);
-        if (el) el.value = v ?? "";
-      }
-      function escapeHtml(str){
-        return String(str ?? "")
-          .replace(/&/g,"&amp;")
-          .replace(/</g,"&lt;")
-          .replace(/>/g,"&gt;")
-          .replace(/"/g,"&quot;");
-      }
-    });
-  </script>
+// Popups Bilder
+function closeImgPopup(){document.getElementById("img-popup-bg").style.display="none";}
+</script>
 </body>
 </html>
