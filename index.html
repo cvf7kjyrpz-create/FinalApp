@@ -2,315 +2,192 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
-<title>Lagerverwaltung</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<meta name="viewport" content="width=device-width, user-scalable=no">
+<title>Lager App</title>
+
 <style>
-body{margin:0;font-family:system-ui;background:#000;color:#fff;overflow:hidden;}
-header{position:fixed;top:0;left:0;width:100%;background:#111;z-index:100;padding:12px 0;display:flex;flex-direction:column;align-items:center;gap:8px;}
-header h2{margin:0;font-size:20px;text-align:center;}
-.header-container{max-width:480px;width:100%;display:flex;flex-direction:column;align-items:center;gap:8px;padding:0 8px;}
-.counters{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;width:100%;}
-.counters div{background:linear-gradient(145deg,#222,#111);padding:6px 10px;border-radius:12px;text-align:center;flex:1 1 100px;max-width:45%;font-size:13px;box-shadow:0 2px 6px rgba(0,0,0,0.7);}
-.top-buttons{display:flex;justify-content:center;flex-wrap:wrap;gap:6px;width:100%;}
-.top-buttons button{background:#222;border:1px solid #337aff;border-radius:12px;padding:10px;color:white;font-size:13px;cursor:pointer;flex:1 1 40%;max-width:48%;box-sizing:border-box;box-shadow:0 2px 6px rgba(0,0,0,0.6);}
-#search{width:100%;max-width:480px;padding:10px;border-radius:10px;border:1px solid #444;background:#111;color:white;margin-bottom:0;box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);}
-.table-container{position:absolute;top:260px;bottom:0;width:100%;overflow:auto;}
-table{width:100%;border-collapse:collapse;color:white;min-width:900px;}
-th,td{border-bottom:1px solid #444;padding:3px 6px;text-align:center;white-space:nowrap;font-size:12px;}
-th{background:#111;position:sticky;top:0;z-index:10;}
-.icon-btn{background:none;border:none;color:white;font-size:14px;cursor:pointer;margin:0 4px;padding:0;}
-.icon-btn:hover{color:#337aff;}
-#popup-bg,#img-popup-bg,#del-popup-bg{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);justify-content:center;align-items:center;z-index:200;}
-.popup,#img-popup,#del-popup,#del-popup{width:320px;max-width:90%;background:#111;padding:20px;border-radius:16px;border:2px solid #337aff;box-shadow:0 6px 20px rgba(0,0,0,0.8);color:white;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;transition: transform 0.2s;}
-.popup input,.popup textarea{width:100%;max-width:100%;padding:10px;background:#222;border:1px solid #444;color:white;border-radius:10px;box-sizing:border-box;}
-.popup h2{margin-top:0;}
-.popup button,#img-popup button,#del-popup button{width:100%;max-width:140px;padding:8px;margin-top:6px;border-radius:10px;border:1px solid #337aff;background:#222;color:white;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.6);}
-.popup button:hover,#img-popup button:hover,#del-popup button:hover{background:#333;transform:translateY(-2px);}
-tr.marked{background: rgba(51,122,255,0.2);}
-#img-popup img{max-width:100%;max-height:400px;margin-bottom:10px;}
+body{margin:0;background:#000;color:white;font-family:Arial,sans-serif;overflow:hidden;}
+#topbar{position:fixed;top:0;left:0;right:0;padding:15px;background:#000;z-index:5000;border-bottom:2px solid #333;}
+#counterWrapper{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
+.counter-box{padding:10px;border:1px solid #444;border-radius:10px;background:#000;}
+.counter-title{font-size:11px;color:#bbb;}
+.counter-value{font-size:18px;font-weight:bold;}
+#searchRow{margin-top:10px;}
+#search{width:100%;padding:10px;border-radius:8px;background:#111;border:1px solid #444;color:white;}
+#buttonRow{margin-top:10px;display:flex;gap:8px;}
+#buttonRow button{flex:1;padding:10px;font-size:11px;color:#bbb;border-radius:10px;background:#000;border:1px solid #444;font-weight:bold;}
+#tableContainer{position:fixed;left:0;right:0;bottom:0;overflow-y:auto;overflow-x:auto;background:#000;z-index:100;-webkit-overflow-scrolling:touch;}
+table{width:100%;border-collapse:collapse;}
+th{background:#111;position:sticky;top:0;z-index:200;padding:6px;color:#bbb;font-size:10px;white-space:nowrap;}
+td{padding:5px;font-size:11px;border-bottom:1px solid #222;white-space:nowrap;}
+.marked{background:#222;}
+.iconCell span{cursor:pointer;margin-right:8px;}
+.iconCell span.delete{margin-left:18px;}
+input.miniQty{width:42px;background:#111;color:white;border:1px solid #444;border-radius:5px;text-align:center;}
+
+#popup,#viewPopup{
+position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+background:#111;padding:16px;border:2px solid #444;border-radius:12px;
+width:90%;max-width:360px;max-height:90vh;overflow-y:auto;display:none;z-index:9999;
+}
+.popup-row{margin-bottom:8px;}
+.popup-row label{font-size:12px;color:#bbb;display:block;margin-bottom:3px;}
+.popup-row input,.popup-row textarea{width:100%;padding:8px;border-radius:8px;border:1px solid #444;background:#1a1a1a;color:white;}
+#popupButtons{display:flex;gap:8px;margin-top:10px;}
+#popupButtons button{flex:1;padding:11px;border-radius:10px;background:#000;border:1px solid #444;color:white;font-weight:bold;}
+img.preview{max-width:100%;border-radius:8px;margin-top:10px;}
 </style>
 </head>
+
 <body>
 
-<header>
-  <div class="header-container">
-    <h2>Lagerverwaltung</h2>
-    <div class="counters">
-      <div>Artikel: <span id="countArtikel">0</span></div>
-      <div>Menge: <span id="gesamtMenge">0</span></div>
-      <div>Wert gelagert: <span id="wertGelagert">0 €</span></div>
-      <div>Gesamtwert: <span id="wertInsgesamt">0 €</span></div>
-    </div>
-    <div class="top-buttons">
-      <button onclick="openPopup()">Artikel anlegen</button>
-      <button onclick="exportBackup()">Backup Export</button>
-      <button onclick="importBackup()">Backup Import</button>
-      <button onclick="generatePDF()">Inventur PDF</button>
-    </div>
-    <input id="search" placeholder="Suchen..." oninput="searchTable()">
+<div id="topbar">
+  <div id="counterWrapper">
+    <div class="counter-box"><div class="counter-title">Artikel im Bestand</div><div id="countArtikel">0</div></div>
+    <div class="counter-box"><div class="counter-title">Gegenstände insgesamt</div><div id="countMenge">0</div></div>
+    <div class="counter-box"><div class="counter-title">Warenwert aktuell (€)</div><div id="countWert">0</div></div>
+    <div class="counter-box"><div class="counter-title">Warenwert gesamt (€)</div><div id="countWertTotal">0</div></div>
   </div>
-</header>
 
-<div class="table-container">
-<table id="tbl">
+  <div id="searchRow">
+    <input id="search" placeholder="Suchen …">
+  </div>
+
+  <div id="buttonRow">
+    <button id="btnAdd">Artikel anlegen</button>
+    <button id="btnExport">Sichern</button>
+    <button id="btnImport">Laden</button>
+    <button id="btnPDF">PDF</button>
+  </div>
+</div>
+
+<div id="tableContainer">
+<table>
 <thead>
 <tr>
-<th>Nr</th><th>Name</th><th>Menge</th><th>Preis/Stk</th><th>Wert</th><th>Wo gekauft</th><th>Datum</th><th>Bilder</th><th>Aktionen</th>
+  <th>*</th><th>Nr</th><th>Name</th><th>Menge</th>
+  <th>Größe</th><th>Preis</th><th>Ort</th><th>Datum</th><th>Aktionen</th>
 </tr>
 </thead>
-<tbody></tbody>
+<tbody id="tableBody"></tbody>
 </table>
 </div>
 
-<!-- Artikel Popup -->
-<div id="popup-bg">
-<div class="popup">
-<h2>Artikel anlegen/bearbeiten</h2>
-<input id="p-nr" placeholder="Artikelnummer">
-<input id="p-name" placeholder="Name">
-<input id="p-date" type="date">
-<input id="p-where" placeholder="Wo gekauft?">
-<input id="p-price" type="number" placeholder="Preis">
-<input id="p-qty" type="number" placeholder="Menge">
-<textarea id="p-note" placeholder="Notiz"></textarea>
-<input id="p-img" type="file" multiple>
-<button onclick="saveItem()">Speichern</button>
-<button onclick="closePopup()">Abbrechen</button>
-</div>
+<div id="popup">
+  <div class="popup-row"><label>Artikelnummer</label><input id="p_artnr"></div>
+  <div class="popup-row"><label>Name</label><input id="p_name"></div>
+  <div class="popup-row"><label>Menge</label><input type="number" id="p_menge" value="1"></div>
+  <div class="popup-row"><label>Größe</label><input id="p_groesse"></div>
+  <div class="popup-row"><label>Preis</label><input type="number" id="p_preis"></div>
+  <div class="popup-row"><label>Ort</label><input id="p_ort"></div>
+  <div class="popup-row"><label>Datum</label><input type="date" id="p_datum"></div>
+  <div class="popup-row"><label>Bild</label><input type="file" id="p_bild"></div>
+  <div class="popup-row"><label>Notiz</label><textarea id="p_notiz"></textarea></div>
+
+  <div id="popupButtons">
+    <button id="btnSave">Speichern</button>
+    <button id="btnCancel">Abbrechen</button>
+  </div>
 </div>
 
-<!-- Bild Popup -->
-<div id="img-popup-bg">
-<div id="img-popup">
-<img id="current-img" src="">
-<button onclick="closeImgPopup()">Schließen</button>
-</div>
-</div>
-
-<!-- Delete Popup -->
-<div id="del-popup-bg">
-<div id="del-popup">
-<p>Willst du den Artikel wirklich löschen?</p>
-<button id="del-yes">Ja</button>
-<button onclick="closeDelPopup()">Abbrechen</button>
-</div>
-</div>
+<div id="viewPopup"></div>
 
 <script>
-// IndexedDB Setup
-let db;
-let request=indexedDB.open("LAGER_DB_FULL",1);
-request.onupgradeneeded=function(e){ e.target.result.createObjectStore("artikel",{keyPath:"nr"}); };
-request.onsuccess=function(e){ db=e.target.result; loadTable(); };
-
-// Popups
-function openPopup(nr=null){
-  document.getElementById("popup-bg").style.display="flex";
-  if(nr){
-    let tx=db.transaction("artikel","readonly");
-    let store=tx.objectStore("artikel");
-    store.get(nr).onsuccess=function(e){
-      let a=e.target.result;
-      if(a){
-        document.getElementById("p-nr").value=a.nr;
-        document.getElementById("p-name").value=a.name;
-        document.getElementById("p-date").value=a.date;
-        document.getElementById("p-where").value=a.where;
-        document.getElementById("p-price").value=a.price;
-        document.getElementById("p-qty").value=a.qty;
-        document.getElementById("p-note").value=a.note;
-        document.getElementById("p-img").value="";
-      }
-    };
-  } else {
-    let tx=db.transaction("artikel","readonly");
-    let store=tx.objectStore("artikel");
-    store.getAll().onsuccess=function(e){
-      let items=e.target.result;
-      let maxNr = 0;
-      items.forEach(i=>{
-        let n=parseInt(i.nr.split("-")[0]);
-        if(n>maxNr) maxNr=n;
-      });
-      document.getElementById("p-nr").value = String(maxNr+1).padStart(3,"0")+"-2025";
-      document.getElementById("p-name").value = "";
-      document.getElementById("p-date").value = "";
-      document.getElementById("p-where").value = "";
-      document.getElementById("p-price").value = "";
-      document.getElementById("p-qty").value = "";
-      document.getElementById("p-note").value = "";
-      document.getElementById("p-img").value = "";
-    };
-  }
-}
-function closePopup(){document.getElementById("popup-bg").style.display="none";}
-
-// Save Item
-function saveItem(){
-  let nr=document.getElementById("p-nr").value.trim();
-  if(!nr){ alert("Artikelnummer darf nicht leer sein"); return; }
-  let name=document.getElementById("p-name").value.trim();
-  let date=document.getElementById("p-date").value;
-  let where=document.getElementById("p-where").value.trim();
-  let price=parseFloat(document.getElementById("p-price").value)||0;
-  let qty=parseInt(document.getElementById("p-qty").value)||0;
-  let note=document.getElementById("p-note").value;
-  let files=document.getElementById("p-img").files;
-  let images=[];
-
-  function saveToDB(){
-    let tx=db.transaction("artikel","readwrite");
-    let store=tx.objectStore("artikel");
-    store.put({nr,name,date,where,price,qty,note,images});
-    tx.oncomplete=function(){ closePopup(); loadTable(); };
-  }
-
-  if(files.length===0){ saveToDB(); return; }
-  let loaded=0;
-  for(let i=0;i<files.length;i++){
-    let reader=new FileReader();
-    reader.onload=function(e){
-      let img=new Image();
-      img.onload=function(){
-        let canvas=document.createElement("canvas");
-        let scale=800/img.width;
-        canvas.width=800; canvas.height=img.height*scale;
-        let ctx=canvas.getContext("2d");
-        ctx.drawImage(img,0,0,canvas.width,canvas.height);
-        images.push(canvas.toDataURL("image/jpeg",0.7));
-        loaded++;
-        if(loaded===files.length) saveToDB();
-      };
-      img.src=e.target.result;
-    };
-    reader.readAsDataURL(files[i]);
-  }
+let artikel = JSON.parse(localStorage.getItem("lagerData") || "[]");
+if(artikel.length === 0){
+artikel = [
+{artnr:"1001-2025",name:"Winterjacke",menge:2,groesse:"L",preis:59.99,ort:"Zara",datum:"2025-01-10",bild:"",notiz:"",markiert:false},
+{artnr:"1002-2025",name:"Sneaker",menge:1,groesse:"43",preis:89.90,ort:"Snipes",datum:"2025-02-03",bild:"",notiz:"",markiert:false},
+{artnr:"1003-2025",name:"Jeans",menge:3,groesse:"32/32",preis:39.95,ort:"H&M",datum:"2025-03-15",bild:"",notiz:"",markiert:false},
+{artnr:"1004-2025",name:"Hoodie",menge:1,groesse:"XL",preis:29.99,ort:"H&M",datum:"2025-04-01",bild:"",notiz:"",markiert:false},
+{artnr:"1005-2025",name:"Cap",menge:5,groesse:"One Size",preis:14.99,ort:"Footlocker",datum:"2025-05-20",bild:"",notiz:"",markiert:false}
+];
+localStorage.setItem("lagerData", JSON.stringify(artikel));
 }
 
-// Load Table
-function loadTable(){
-  let body=document.querySelector("#tbl tbody");
-  body.innerHTML="";
-  let tx=db.transaction("artikel","readonly");
-  let store=tx.objectStore("artikel");
-  store.getAll().onsuccess=function(e){
-    let items=e.target.result||[];
-    document.getElementById("countArtikel").innerText=items.length;
-    let totalQty=0, wert=0;
-    items.forEach(a=>{ totalQty+=a.qty; wert+=a.qty*a.price; });
-    document.getElementById("gesamtMenge").innerText=totalQty;
-    document.getElementById("wertGelagert").innerText=wert.toFixed(2)+" €";
-    document.getElementById("wertInsgesamt").innerText=wert.toFixed(2)+" €";
-
-    items.forEach(a=>{
-      let dateParts=a.date.split("-");
-      let dateFormatted=(dateParts[2]||"")+"-"+(dateParts[1]||"")+"-"+(dateParts[0]||"");
-      let tr=document.createElement("tr");
-      tr.innerHTML=`<td>${a.nr}</td><td>${a.name}</td>
-      <td><input type="number" value="${a.qty}" style="width:50px" onchange="updateQty('${a.nr}',this.value)"></td>
-      <td>${a.price}</td>
-      <td>${(a.qty*a.price).toFixed(2)}</td>
-      <td>${a.where}</td>
-      <td>${dateFormatted}</td>
-      <td><button class="icon-btn" onclick='alert("Bilder ansehen: ${a.images.length} Bilder")'>🖼</button></td>
-      <td>
-        <button class="icon-btn" onclick="alert('Notiz: ${a.note}')">📝</button>
-        <button class="icon-btn" onclick="toggleMark(this)">✔</button>
-        <button class="icon-btn" onclick="openPopup('${a.nr}')">✎</button>
-        <button class="icon-btn" onclick="confirmDel('${a.nr}')">🗑</button>
-      </td>`;
-      body.appendChild(tr);
-    });
-  };
+function renderTable(){
+tableBody.innerHTML="";
+artikel.forEach((a,i)=>{
+const tr=document.createElement("tr");
+if(a.markiert)tr.classList.add("marked");
+tr.innerHTML = `
+<td onclick="toggleMark(${i})">${a.markiert?"⭐":"☆"}</td>
+<td>${a.artnr}</td>
+<td>${a.name}</td>
+<td><input class="miniQty" type="number" value="${a.menge}" onchange="updateQty(${i},this.value)"></td>
+<td>${a.groesse}</td>
+<td>${a.preis.toFixed(2)}</td>
+<td>${a.ort}</td>
+<td>${a.datum}</td>
+<td class="iconCell">
+<span onclick="viewImg(${i})">📷</span>
+<span onclick="viewNote(${i})">📝</span>
+<span onclick="edit(${i})">✏️</span>
+<span class="delete" onclick="del(${i})">🗑</span>
+</td>`;
+tableBody.appendChild(tr);
+});
+updateCounters();
 }
 
-// Menge ändern
-function updateQty(nr,val){
-  let tx=db.transaction("artikel","readwrite");
-  let store=tx.objectStore("artikel");
-  store.get(nr).onsuccess=function(e){
-    let a=e.target.result;
-    a.qty=parseInt(val)||0;
-    store.put(a);
-    tx.oncomplete=loadTable;
-  };
+function updateQty(i,val){
+artikel[i].menge=parseInt(val)||0;
+localStorage.setItem("lagerData",JSON.stringify(artikel));
+updateCounters();
 }
 
-// Markieren
-function toggleMark(btn){let tr=btn.closest("tr");tr.classList.toggle("marked");}
-
-// Löschen
-let delNr="";
-function confirmDel(nr){delNr=nr;document.getElementById("del-popup-bg").style.display="flex";}
-document.getElementById("del-yes").onclick=function(){delItem(delNr);closeDelPopup();}
-function closeDelPopup(){document.getElementById("del-popup-bg").style.display="none";}
-function delItem(id){let tx=db.transaction("artikel","readwrite");let store=tx.objectStore("artikel");store.delete(id);tx.oncomplete=loadTable;}
-
-// Backup Download
-function exportBackup(){
-  if(!db) return;
-  let tx=db.transaction("artikel","readonly");
-  let store=tx.objectStore("artikel");
-  store.getAll().onsuccess=function(e){
-    let items=e.target.result||[];
-    let blob=new Blob([JSON.stringify(items)],{type:"application/json"});
-    let a=document.createElement("a");
-    a.href=URL.createObjectURL(blob);
-    a.download="backup.json";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  };
+function updateCounters(){
+countArtikel.textContent=artikel.length;
+let m=0,w=0;
+artikel.forEach(a=>{m+=a.menge;w+=a.menge*a.preis});
+countMenge.textContent=m;
+countWert.textContent=w.toFixed(2);
+countWertTotal.textContent=w.toFixed(2);
 }
 
-// Import Backup
-function importBackup(){
-  let inp=document.createElement("input");inp.type="file";inp.accept="application/json";
-  inp.onchange=function(){let file=inp.files[0];let reader=new FileReader();
-    reader.onload=function(e){let items=JSON.parse(e.target.result);
-      let tx=db.transaction("artikel","readwrite");let store=tx.objectStore("artikel");
-      items.forEach(i=>store.put(i));
-      tx.oncomplete=()=>{loadTable();};};
-    reader.readAsText(file);};
-  inp.click();
+btnAdd.onclick=()=>{popup.style.display="block";};
+btnCancel.onclick=()=>{popup.style.display="none";};
+
+btnSave.onclick=()=>{
+const obj={
+artnr:p_artnr.value,
+name:p_name.value,
+menge:+p_menge.value,
+groesse:p_groesse.value,
+preis:+p_preis.value,
+ort:p_ort.value,
+datum:p_datum.value,
+notiz:p_notiz.value,
+bild:"",
+markiert:false
+};
+if(p_bild.files[0]){
+const r=new FileReader();
+r.onload=e=>{obj.bild=e.target.result;push(obj);}
+r.readAsDataURL(p_bild.files[0]);
+}else push(obj);
+};
+
+function push(obj){
+artikel.push(obj);
+localStorage.setItem("lagerData",JSON.stringify(artikel));
+popup.style.display="none";
+renderTable();
 }
 
-// PDF Inventur
-async function generatePDF(){
-  if(!db)return;
-  const { jsPDF } = window.jspdf;
-  const doc=new jsPDF();
-  let y=10; doc.setFontSize(12);
-  doc.text("Inventur",10,y); y+=8;
-  doc.text("Nr | Name | Menge | Preis | Wert | Wo gekauft | Datum",10,y); y+=6;
-  let tx=db.transaction("artikel","readonly");
-  let store=tx.objectStore("artikel");
-  const items=await new Promise(resolve=>store.getAll().onsuccess=e=>resolve(e.target.result));
-  items.forEach(a=>{
-    let dateParts=a.date.split("-");
-    let dateFormatted=(dateParts[2]||"")+"/"+(dateParts[1]||"")+"/"+(dateParts[0]||"");
-    let line=`${a.nr} | ${a.name} | ${a.qty} | ${a.price} | ${(a.qty*a.price).toFixed(2)} | ${a.where} | ${dateFormatted}`;
-    y+=6; if(y>280){doc.addPage(); y=10;}
-    doc.text(line,10,y);
-  });
-  let blob=doc.output("blob");
-  let link=document.createElement("a");
-  link.href=URL.createObjectURL(blob);
-  link.download="inventur.pdf";
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-}
+btnPDF.onclick=()=>{
+let w=window.open("","_blank");
+let html=`<table border="1" cellpadding="4"><tr>
+<th>Nr</th><th>Name</th><th>Menge</th><th>Notiz</th></tr>`;
+artikel.forEach(a=>{
+html+=`<tr><td>${a.artnr}</td><td>${a.name}</td><td>${a.menge}</td><td></td></tr>`;
+});
+html+=`</table>`;
+w.document.write(html);
+w.print();
+};
 
-// Suche
-function searchTable(){
-  let val=document.getElementById("search").value.toLowerCase();
-  document.querySelectorAll("#tbl tbody tr").forEach(tr=>{tr.style.display=tr.innerText.toLowerCase().includes(val)?"":"none";});
-}
-
-// Popups Bilder
-function closeImgPopup(){document.getElementById("img-popup-bg").style.display="none";}
+renderTable();
 </script>
 </body>
 </html>
